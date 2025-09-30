@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>io.emop</groupId>
+    <artifactId>integration-test</artifactId>
+    <version>${emop.version}</version>
+    <name>integration-test</name>
+
+    <properties>
+        <java.version>17</java.version>
+        <emop.version>0.0.1-SNAPSHOT</emop.version>
+        <lombok.version>1.18.26</lombok.version>
+        <junit.version>5.10.1</junit.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <!-- EMOP核心依赖 -->
+        <dependency>
+            <groupId>io.emop</groupId>
+            <artifactId>platform-essentials</artifactId>
+            <version>${emop.version}</version>
+        </dependency>
+
+        <!-- 测试依赖 -->
+        <!-- JUnit 5 Platform Suite -->
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-suite</artifactId>
+            <version>1.10.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- JUnit 5 Suite Engine -->
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-suite-engine</artifactId>
+            <version>1.10.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- 测试工具 -->
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.24.2</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Lombok（如果测试中也需要） -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.10.1</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- 主要的测试插件配置 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.2</version>
+                <configuration>
+                    <!-- 只运行指定的测试套件 -->
+                    <includes>
+                        <include>**/EmopIntegrationTestSuite.java</include>
+                        <include>**/EmopPerformanceTestSuite.java</include>
+                    </includes>
+
+                    <!-- 排除其他测试文件 -->
+                    <excludes>
+                        <exclude>**/usecase/*.java</exclude>
+                        <exclude>**/performance/*.java</exclude>
+                        <exclude>**/*Test.java</exclude>
+                    </excludes>
+
+                    <!-- 测试报告配置 -->
+                    <reportFormat>xml</reportFormat>
+                    <useFile>true</useFile>
+
+                    <!-- 重要：测试失败不影响构建 -->
+                    <testFailureIgnore>true</testFailureIgnore>
+
+                    <!-- 生成详细的测试报告 -->
+                    <reportNameSuffix>surefire-report</reportNameSuffix>
+                    <printSummary>true</printSummary>
+
+                    <!-- JVM参数 -->
+                    <argLine>-Xmx4096m -XX:+HeapDumpOnOutOfMemoryError</argLine>
+
+                    <!-- 超时设置 -->
+                    <forkedProcessTimeoutInSeconds>1800</forkedProcessTimeoutInSeconds>
+                </configuration>
+            </plugin>
+
+            <!-- Surefire Report 插件 - 生成HTML测试报告 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>3.2.2</version>
+                <configuration>
+                    <outputDirectory>${project.build.directory}/surefire-reports</outputDirectory>
+                    <outputName>surefire-report</outputName>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report-only</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
