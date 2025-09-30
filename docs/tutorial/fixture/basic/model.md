@@ -30,13 +30,13 @@ cd emop-starters
 mvn clean install
 
 # 编译业务服务
-cd ../emop-business
+cd ../applications
 mvn clean install -DskipTests
 ```
 
 ## 2. 模型实现
 
-IDE打开maven项目`emop-business`后，在`emop-business/emop-server-plugins/emop-server-plugin-api/src/main/java/io/emop/model/sample`目录下创建以下类：
+IDE打开maven项目`applications`后，在`applications/server-plugins/server-plugin-api/src/main/java/io/emop/model/sample`目录下创建以下类：
 
 ### 2.1 夹具分类 (Category)
 ```java
@@ -166,7 +166,7 @@ public class Product extends ItemRevision {
 # 进入项目根目录
 cd emop3
 
-cd emop-business/emop-server-plugins
+cd applications/server-plugins
 mvn compile
 ```
 
@@ -175,7 +175,7 @@ mvn compile
 # 进入项目根目录
 cd emop3
 
-cd emop-business/emop-server-plugins
+cd applications/server-plugins
 startEMOPServer.bat
 ```
 

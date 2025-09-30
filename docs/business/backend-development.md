@@ -16,19 +16,19 @@ EMOP采用以下架构模式：
 
 项目打包及启动结构，EMOP Server及PLM服务:
 ```
-emop-business/                          # EMOP业务系统根目录
-├── emop-server-plugins/                
-│   ├── emop-server-plugin-api.jar      # 服务器插件API接口定义jar包
-│   ├── emop-server-plugin.jar          # 插件核心实现jar包
+applications/                          # EMOP业务系统根目录
+├── server-plugins/                
+│   ├── server-plugin-api.jar      # 服务器插件API接口定义jar包
+│   ├── server-plugin.jar          # 插件核心实现jar包
 │   └── startEMOPServer.bat             # EMOP服务器启动脚本
 │   │       └── emop-server-webconsole.jar     # EMOP Server Fat Jar(不包含插件) 
-├── emop-plm/                          # PLM产品生命周期管理模块 
-│   ├── emop-plm-starter.jar           # PLM服务启动Fat Jar包(包含PLM主程序)
+├── plm/                          # PLM产品生命周期管理模块 
+│   ├── plm-starter.jar           # PLM服务启动Fat Jar包(包含PLM主程序)
 │   ├── project-manager.jar            # 项目管理领域实现jar包 
 │   ├── project-manager-api.jar        # 项目管理领域模型及API定义jar包
 │   ├── ......                         # 更多领域模型、API定义及实现
 │   └── startPLMServer.bat             # PLM服务启动脚本
-├── emop-foundation/            # 基础服务 
+├── foundation/            # 基础服务 
 │   ├── auth/                   # 认证服务实现
 │   ├── auth-api/               # 认证服务API定义
 │   ├── foundation-starter/     # Foundation服务启动模块
@@ -60,8 +60,8 @@ emop-business/                          # EMOP业务系统根目录
 ### 1. 插件项目结构
 
 ```
-emop-server-plugins/
-├── emop-server-plugin-api/           # 插件API定义
+server-plugins/
+├── server-plugin-api/           # 插件API定义
 │   └── src/main/java/io/emop/
 │       └── model/                    # 核心领域模型
 │           ├── bom/                  # BOM相关模型
@@ -74,7 +74,7 @@ emop-server-plugins/
 │           ├── cad/                  # CAD服务接口
 │           ├── doc/                  # 文档服务接口
 │           └── ....../               # 更多相关服务接口
-├── emop-server-plugin/              # 插件实现
+├── server-plugin/              # 插件实现
     └── src/main/java/
         └── impl/                    # 服务实现
 ```
@@ -140,13 +140,13 @@ public class BomLine extends AbstractModelObject {
 详细的建模规范请参考[领域建模指南](../platform/domain-modeling.md)。
 
 ```java
-// 在 emop-server-plugin-api 中定义服务接口
+// 在 server-plugin-api 中定义服务接口
 @Remote
 public interface BOMService {
     List<BOMItem> batchCreate(List<BOMItem> items);
 }
 
-// 在 emop-server-plugin 中实现服务
+// 在 server-plugin 中实现服务
 @Service
 public class BOMServiceImpl implements BOMService {
     @Transactional

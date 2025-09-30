@@ -144,7 +144,7 @@ npx @modelcontextprotocol/inspector
 npx @modelcontextprotocol/server-filesystem \
   --allowed-directory /mnt/d/workspace/emop/emop3/docs \
   --allowed-directory /mnt/d/workspace/emop/emop3/emop-platform/emop-platform-api \
-  --allowed-directory /mnt/d/workspace/emop/emop3/emop-business/emop-server-plugins/emop-server-plugin-api
+  --allowed-directory /mnt/d/workspace/emop/emop3/applications/server-plugins/server-plugin-api
 ```
 
 **参数说明：**
@@ -154,8 +154,8 @@ npx @modelcontextprotocol/server-filesystem \
 
 **配置的访问目录：**
 1. **文档目录**：`/mnt/d/workspace/emop/emop3/docs` - 项目文档
-2. **平台API**：`/mnt/d/workspace/emop/emop3/emop-platform/emop-platform-api` - 平台API源代码
-3. **插件API**：`/mnt/d/workspace/emop/emop3/emop-business/emop-server-plugins/emop-server-plugin-api` - 服务器插件API源代码
+2. **平台API**：`/mnt/d/workspace/emop/emop3/server/platform-api` - 平台API源代码
+3. **插件API**：`/mnt/d/workspace/emop/emop3/applications/server-plugins/server-plugin-api` - 服务器插件API源代码
 
 **测试方法：**
 
@@ -168,7 +168,7 @@ npx @modelcontextprotocol/inspector
 # 在浏览器中访问显示的URL，添加MCP服务器：
 # Transport Type: STDIO
 # Command: npx
-# Args: @modelcontextprotocol/server-filesystem --allowed-directory /mnt/d/workspace/emop/emop3/docs --allowed-directory /mnt/d/workspace/emop/emop3/emop-platform/emop-platform-api --allowed-directory /mnt/d/workspace/emop/emop3/emop-business/emop-server-plugins/emop-server-plugin-api
+# Args: @modelcontextprotocol/server-filesystem --allowed-directory /mnt/d/workspace/emop/emop3/docs --allowed-directory /mnt/d/workspace/emop/emop3/emop-platform/emop-platform-api --allowed-directory /mnt/d/workspace/emop/emop3/applications/server-plugins/server-plugin-api
 ```
 
 **验证功能：**
@@ -187,7 +187,7 @@ npx @modelcontextprotocol/inspector
         "@modelcontextprotocol/server-filesystem",
         "--allowed-directory", "/mnt/d/workspace/emop/emop3/docs",
         "--allowed-directory", "/mnt/d/workspace/emop/emop3/emop-platform/emop-platform-api",
-        "--allowed-directory", "/mnt/d/workspace/emop/emop3/emop-business/emop-server-plugins/emop-server-plugin-api"
+        "--allowed-directory", "/mnt/d/workspace/emop/emop3/applications/server-plugins/server-plugin-api"
       ],
       "disabled": false,
       "autoApprove": []
