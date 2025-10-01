@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>io.emop.example</groupId>
+    <artifactId>hello-emop-server</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>hello-emop-server</name>
+    <description>EMOP Server Example Project</description>
+
+    <properties>
+        <java.version>17</java.version>
+        <emop.version>0.0.1-SNAPSHOT</emop.version>
+        <spring.boot.version>3.1.0</spring.boot.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <modules>
+        <module>hello-plugin-api</module>
+        <module>hello-plugin</module>
+        <module>hello-server</module>
+        <module>hello-client</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- EMOP Platform Dependencies -->
+            <dependency>
+                <groupId>io.emop</groupId>
+                <artifactId>platform-api</artifactId>
+                <version>${emop.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.emop</groupId>
+                <artifactId>platform-essentials</artifactId>
+                <version>${emop.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.emop</groupId>
+                <artifactId>server-webconsole</artifactId>
+                <version>${emop.version}</version>
+            </dependency>
+
+            <!-- Spring Boot BOM -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring.boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- Project modules -->
+            <dependency>
+                <groupId>io.emop.example</groupId>
+                <artifactId>hello-plugin-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.emop.example</groupId>
+                <artifactId>hello-plugin</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
