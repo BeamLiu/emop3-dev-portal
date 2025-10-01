@@ -21,7 +21,7 @@ applications/                          # EMOP业务系统根目录
 │   ├── server-plugin-api.jar      # 服务器插件API接口定义jar包
 │   ├── server-plugin.jar          # 插件核心实现jar包
 │   └── startEMOPServer.bat             # EMOP服务器启动脚本
-│   │       └── emop-server-webconsole.jar     # EMOP Server Fat Jar(不包含插件) 
+│   │       └── server-webconsole.jar     # EMOP Server Fat Jar(不包含插件) 
 ├── plm/                          # PLM产品生命周期管理模块 
 │   ├── plm-starter.jar           # PLM服务启动Fat Jar包(包含PLM主程序)
 │   ├── project-manager.jar            # 项目管理领域实现jar包 
