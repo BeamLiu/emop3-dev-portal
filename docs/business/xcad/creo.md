@@ -127,7 +127,7 @@ echo %ES_CAD_HOME%
 
 #### 2.4.2 `emop3\xcad-client\creo-integration-client\ES_CAD_HOME\config.properties`配置
 ```bash
-CAD_WEB_SERVER=http://emop.emopdata.com/
+CAD_WEB_SERVER=http://dev.emop.emopdata.com/
 ES_CAD_CREOSON_URL=http://localhost:8088/creoson
 EC_PRIMARY_KEY=ID
 ```

@@ -37,7 +37,7 @@ public class DSLExecutionTest {
     private String bucketPath = "temp:testcase" + System.currentTimeMillis();
 
     static {
-        System.setProperty("minio.endpoint", "http://storage.emop.emopdata.com:9000");
+        System.setProperty("minio.endpoint", "http://storage-${EMOP_DOMAIN}:9000");
         System.setProperty("minio.accessKey", "minioadmin");
         System.setProperty("minio.secretKey", "EmopIs2Fun!");
     }

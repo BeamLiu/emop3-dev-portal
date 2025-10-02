@@ -89,11 +89,11 @@ hello-emop-server-full/
 - 保证以下服务可用, 并设置本地的`hosts`解析
 ```
 # 缓存 Redis
-192.168.10.103 cache.emop.emopdata.com
+192.168.10.103 cache-dev.emop.emopdata.com
 # 注册中心(建议使用本地的consul，避免注册到公共环境污染公共环境的服务列表)
-127.0.0.1 registry.emop.emopdata.com
+127.0.0.1 registry-dev.emop.emopdata.com
 # 数据库集群域名映射
-192.168.10.103 emop-db-master.emop.emopdata.com
+192.168.10.103 emop-db-master-dev.emop.emopdata.com
 ```
 - 确认 maven 已经使用了阿里云私仓
 - JDK 17+

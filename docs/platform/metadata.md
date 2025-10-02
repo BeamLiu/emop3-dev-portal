@@ -296,20 +296,20 @@ emop:
   storage:
     postgresql:
       master:
-        host: emop-db-master.emop.emopdata.com
+        host: emop-db-master-${EMOP_DOMAIN}
         port: 5432
         database: emop
         schema: public
         username: emop
         password: EmopIs2Fun!
       replicas:
-        -  host: emop-db-slave1.emop.emopdata.com
+        -  host: emop-db-slave1-${EMOP_DOMAIN}
            port: 5431
            database: emop
            schema: public
            username: emop
            password: EmopIs2Fun!
-        -  host: emop-db-slave2.emop.emopdata.com
+        -  host: emop-db-slave2-${EMOP_DOMAIN}
            port: 5430
            database: emop
            schema: public

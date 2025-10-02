@@ -10,7 +10,7 @@ spring:
       static-locations: classpath:/static/,classpath:/public/
   data:
     redis:
-      host: cache.emop.emopdata.com  # Using the network alias from docker-compose
+      host: cache-${EMOP_DOMAIN}  # Using the network alias from docker-compose
       port: 6379
       password: EmopIs2Fun!
       database: 0
@@ -32,7 +32,7 @@ emop:
     postgresql:
       # DDL 操作使用的超级用户连接
       admin:
-        host: emop-db-master.emop.emopdata.com
+        host: emop-db-master-${EMOP_DOMAIN}
         port: 5432
         database: emop
         schema: public
@@ -42,7 +42,7 @@ emop:
         maximum-pool-size: 2
       # DML 操作使用的应用用户连接
       master:
-        host: emop-db-master.emop.emopdata.com
+        host: emop-db-master-${EMOP_DOMAIN}
         port: 5432
         database: emop
         schema: public
@@ -60,3 +60,5 @@ logging:
   level:
     root: INFO
     io.emop: DEBUG
+
+EMOP_DOMAIN: dev.emop.emopdata.com

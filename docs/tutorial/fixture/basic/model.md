@@ -204,7 +204,7 @@ show type Product'
 ### 4.3 数据库结构验证
 
 使用DBeaver连接Postgresql数据库：
-> - 主库：`jdbc:postgresql://emop-db-master.emop.emopdata.com:5432/emop`
+> - 主库：`jdbc:postgresql://emop-db-master-dev.emop.emopdata.com:5432/emop`
 > - 用户名/密码：`emop/EmopIs2Fun!`
 
 预期索引说明：
