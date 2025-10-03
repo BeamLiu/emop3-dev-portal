@@ -92,7 +92,7 @@ public class XPathDemo {
         log.info("=== 传统代码方式 ===");
 
         // 1. 传统方式：逐层访问项目任务
-        List<RSampleTask> tasks = loadedProject.get("tasks", List.class);
+        List<RSampleTask> tasks = loadedProject.get("tasks");
         log.info("传统方式 - 项目任务数量: {}", tasks != null ? tasks.size() : 0);
 
         if (tasks != null && !tasks.isEmpty()) {
@@ -101,7 +101,7 @@ public class XPathDemo {
             log.info("传统方式 - 第一个任务名称: {}", taskName);
 
             // 传统方式：访问任务的交付物
-            List<File> attachments = firstTask.get("attachments", List.class);
+            List<File> attachments = firstTask.get("attachments");
             if (attachments != null && !attachments.isEmpty()) {
                 File firstFile = attachments.get(0);
                 String fileName = firstFile.getName();
@@ -113,23 +113,23 @@ public class XPathDemo {
         log.info("=== JXPath表达式方式 ===");
 
         // 1. JXPath方式：直接获取所有任务
-        List<RSampleTask> xpathTasks = loadedProject.get("tasks[*]", List.class);
+        List<RSampleTask> xpathTasks = loadedProject.get("tasks[*]");
         log.info("JXPath方式 - 项目任务数量: {}", xpathTasks != null ? xpathTasks.size() : 0);
 
         // 2. JXPath方式：直接获取第一个任务名称, 下标从1开始
-        List<?> firstTaskName = loadedProject.get("tasks[1]/name", List.class);
+        List<?> firstTaskName = loadedProject.get("tasks[1]/name");
         log.info("JXPath方式 - 第一个任务名称: {}", firstTaskName);
 
         // 3. JXPath方式：直接获取第一个任务的第一个交付物名称, 下标从1开始
-        List<?> firstFileName = loadedProject.get("tasks[1]/attachments[1]/name", List.class);
+        List<?> firstFileName = loadedProject.get("tasks[1]/attachments[1]/name");
         log.info("JXPath方式 - 第一个交付物名称: {}", firstFileName);
 
         // 4. JXPath方式：获取所有任务名称
-        List<?> allTaskNames = loadedProject.get("tasks[*]/name", List.class);
+        List<?> allTaskNames = loadedProject.get("tasks[*]/name");
         log.info("JXPath方式 - 所有任务名称: {}", allTaskNames);
 
         // 5. JXPath方式：获取所有交付物名称
-        List<String> allFileNames = loadedProject.get("tasks[*]/attachments[*]/name", List.class);
+        List<String> allFileNames = loadedProject.get("tasks[*]/attachments[*]/name");
         log.info("JXPath方式 - 所有交付物名称: {}", allFileNames);
     }
 
@@ -143,43 +143,43 @@ public class XPathDemo {
         RSampleProject loadedProject = Q.id(project.getId());
 
         // 1. 条件过滤 - 查找特定负责人的任务
-        List<RSampleTask> architectTasks = loadedProject.get("tasks[@assignee='架构师B']", List.class);
+        List<RSampleTask> architectTasks = loadedProject.get("tasks[@assignee='架构师B']");
         log.info("JXPath条件查询 - 架构师B负责的任务数量: {}", architectTasks != null ? architectTasks.size() : 0);
         if (architectTasks != null && !architectTasks.isEmpty()) {
             log.info("  任务名称: {}", architectTasks.get(0).getName());
         }
 
         // 2. 嵌套条件查询 - 查找前端工程师负责的子任务
-        List<RSampleTask> frontendSubTasks = loadedProject.get("tasks[*]/subTasks[@assignee='前端工程师']", List.class);
+        List<RSampleTask> frontendSubTasks = loadedProject.get("tasks[*]/subTasks[@assignee='前端工程师']");
         log.info("JXPath嵌套查询 - 前端工程师负责的子任务数量: {}", frontendSubTasks != null ? frontendSubTasks.size() : 0);
         if (frontendSubTasks != null && !frontendSubTasks.isEmpty()) {
             log.info("  子任务名称: {}", frontendSubTasks.get(0).getName());
         }
 
         // 3. 多条件查询 - 查找特定状态和优先级的任务
-        List<RSampleTask> todoMediumTasks = loadedProject.get("tasks[@status='TODO' and @priority='MEDIUM']", List.class);
+        List<RSampleTask> todoMediumTasks = loadedProject.get("tasks[@status='TODO' and @priority='MEDIUM']");
         log.info("JXPath多条件查询 - TODO状态且中等优先级的任务数量: {}", todoMediumTasks != null ? todoMediumTasks.size() : 0);
 
         // 4. 函数使用 - 统计任务数量
-        List<Integer> taskCount = loadedProject.get("count(tasks[*])", List.class);
+        List<Integer> taskCount = loadedProject.get("count(tasks[*])");
         log.info("JXPath函数 - 任务总数: {}", taskCount);
 
         // 5. 字符串函数 - 查找名称包含特定字符的任务
-        List<RSampleTask> designTasks = loadedProject.get("tasks[contains(name, '设计')]", List.class);
+        List<RSampleTask> designTasks = loadedProject.get("tasks[contains(name, '设计')]");
         log.info("JXPath字符串函数 - 名称包含'设计'的任务数量: {}", designTasks != null ? designTasks.size() : 0);
 
         // 6. 位置函数 - 获取最后一个任务
-        List<RSampleTask> lastTask = loadedProject.get("tasks[last()]", List.class);
+        List<RSampleTask> lastTask = loadedProject.get("tasks[last()]");
         if (lastTask != null) {
             log.info("JXPath位置函数 - 最后一个任务: {}", lastTask.iterator().next().getName());
         }
 
         // 7. 复杂路径 - 获取所有子任务的项目名称（反向关系）
-        List<String> projectNames = loadedProject.get("tasks[*]/subTasks[*]/project/name", List.class);
+        List<String> projectNames = loadedProject.get("tasks[*]/subTasks[*]/project/name");
         log.info("JXPath复杂路径 - 通过子任务反向获取的项目名称数量: {}", projectNames != null ? projectNames.size() : 0);
 
         // 8. 属性值比较 - 查找进度大于0的任务
-        List<RSampleTask> progressTasks = loadedProject.get("tasks[@progress>0]", List.class);
+        List<RSampleTask> progressTasks = loadedProject.get("tasks[@progress>0]");
         log.info("JXPath数值比较 - 进度大于0的任务数量: {}", progressTasks != null ? progressTasks.size() : 0);
     }
 
@@ -221,7 +221,7 @@ public class XPathDemo {
                 .append("\n");
 
         // 使用JXPath获取子任务
-        List<RSampleTask> subTasks = task.get("subTasks[*]", List.class);
+        List<RSampleTask> subTasks = task.get("subTasks[*]");
         if (subTasks != null && !subTasks.isEmpty()) {
             for (int i = 0; i < subTasks.size(); i++) {
                 RSampleTask subTask = subTasks.get(i);

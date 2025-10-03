@@ -140,7 +140,7 @@ public class RSampleProjectManagementServiceImpl implements RSampleProjectManage
      */
     private void loadSubTasksRecursively(RSampleTask task) {
         // 触发懒加载
-        List<RSampleTask> subTasks = task.get("subTasks", List.class);
+        List<RSampleTask> subTasks = task.get("subTasks");
         if (subTasks != null) {
             for (RSampleTask subTask : subTasks) {
                 loadSubTasksRecursively(subTask);

@@ -62,7 +62,7 @@ public class JavaApiDemo {
 
         for (RSampleTask task : taskTree) {
             log.info("  根任务: {}", task.getName());
-            List<RSampleTask> subTasks = task.get("subTasks", List.class);
+            List<RSampleTask> subTasks = task.get("subTasks");
             if (subTasks != null) {
                 for (RSampleTask subTask : subTasks) {
                     log.info("    子任务: {}", subTask.getName());
@@ -108,12 +108,12 @@ public class JavaApiDemo {
         // 4. 验证结构关系
         RSampleProject loadedProject = Q.id(project.getId());
 
-        List<RSampleTask> projectTasks = loadedProject.get("tasks", List.class);
+        List<RSampleTask> projectTasks = loadedProject.get("tasks");
         log.info("项目包含 {} 个任务", projectTasks != null ? projectTasks.size() : 0);
 
         RSampleTask loadedParentTask = Q.id(parentTask.getId());
 
-        List<RSampleTask> subTasks = loadedParentTask.get("subTasks", List.class);
+        List<RSampleTask> subTasks = loadedParentTask.get("subTasks");
         log.info("父任务包含 {} 个子任务", subTasks != null ? subTasks.size() : 0);
 
         if (subTasks != null) {
@@ -159,7 +159,7 @@ public class JavaApiDemo {
         // 4. 验证关联关系
         RSampleTask loadedTask = Q.id(task.getId());
 
-        List<File> attachments = loadedTask.get("attachments", List.class);
+        List<File> attachments = loadedTask.get("attachments");
         log.info("任务关联了 {} 个文件", attachments != null ? attachments.size() : 0);
 
         if (attachments != null) {
@@ -189,7 +189,7 @@ public class JavaApiDemo {
                 .query();
 
         for (RSampleTask task : tasksWithFiles) {
-            List<File> files = task.get("attachments", List.class);
+            List<File> files = task.get("attachments");
             if (files != null && !files.isEmpty()) {
                 log.info("任务 '{}' 有 {} 个关联文件", task.getName(), files.size());
             }
