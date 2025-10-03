@@ -3,6 +3,14 @@
 
 XPath 是 EMOP 中一个强大的数据访问和操作工具，它允许您使用路径表达式来导航和操作复杂的对象树结构。XPath 支持被集成在所有数据操作方式中，包括 Java API、DSL 和前端操作。
 
+## 重要说明
+
+**XPath 查询总是返回 List**：为了提供稳定的用户预期和一致的行为，所有 XPath 表达式的查询结果都会被包装在 List 中返回，即使只有一个匹配结果。这样设计的好处是：
+
+- 用户不需要考虑返回的是单个对象还是多个对象
+- 避免了类型转换的复杂性和错误
+- 提供了一致的 API 体验
+
 ## 基本概念
 
 ### XPath 路径
@@ -37,17 +45,22 @@ materials[string-length(description) > 10]
 从当前对象开始查找：
 
 ```java
-// 获取单个属性
-String code = product.get("materials[@id>0]/code");
+// XPath 查询总是返回 List，确保稳定的预期
+List<?> codes = product.get("materials[@id>0]/code");
 
 // 获取集合
-List<ModelObject> materials = product.get("materials[*]");
+List<?> materials = product.get("materials[*]");
 
-// 获取第一个匹配项
-ModelObject material = product.get("materials[@id>0]");
+// 获取第一个匹配项 - 仍然返回 List，需要取第一个元素
+List<?> materialList = product.get("materials[@id>0]");
+ModelObject material = materialList.isEmpty() ? null : (ModelObject) materialList.get(0);
 
 // 获取所有匹配项的特定属性
-List<String> codes = product.get("materials[@id>0][*]/code");
+List<?> allCodes = product.get("materials[*]/code");
+
+// 聚合函数返回单个值的 List
+List<?> countList = product.get("count(materials)");
+Integer count = countList.isEmpty() ? 0 : ((Number) countList.get(0)).intValue();
 ```
 
 ### 更新操作
@@ -98,47 +111,50 @@ import Part "parts.csv" {
 ### 1. 层级数据访问
 
 ```java
-// 访问多层级属性
-product.get("specs/material/supplier/name");
+// 访问多层级属性 - 返回 List
+List<?> names = product.get("specs/material/supplier/name");
+String name = names.isEmpty() ? null : (String) names.get(0);
 
-// 访问特定索引
-product.get("materials[0]/specifications");
+// 访问特定索引 - 返回 List
+List<?> specs = product.get("materials[1]/specifications");
 ```
 
 ### 2. 条件筛选
 
 ```java
-// 单个条件
-product.get("materials[@type='RAW']");
+// 单个条件 - 返回匹配的材料列表
+List<?> rawMaterials = product.get("materials[@type='RAW']");
 
-// 多个条件
-product.get("materials[@type='RAW' and @status='ACTIVE']");
+// 多个条件 - 返回匹配的材料列表
+List<?> activeMaterials = product.get("materials[@type='RAW' and @status='ACTIVE']");
 
-// 数值比较
-product.get("materials[@quantity>100]");
+// 数值比较 - 返回匹配的材料列表
+List<?> highQuantityMaterials = product.get("materials[@quantity>100]");
 ```
 
 ### 3. 集合操作
 
 ```java
-// 获取所有子项
-product.get("materials[*]");
+// 获取所有子项 - 返回所有材料的列表
+List<?> allMaterials = product.get("materials[*]");
 
-// 获取特定范围
-product.get("materials[position()<3]");
+// 获取特定范围 - 返回前两个材料的列表
+List<?> firstTwoMaterials = product.get("materials[position()<3]");
 
-// 获取最后一项
-product.get("materials[last()]");
+// 获取最后一项 - 返回包含最后一个材料的列表
+List<?> lastMaterialList = product.get("materials[last()]");
+ModelObject lastMaterial = lastMaterialList.isEmpty() ? null : (ModelObject) lastMaterialList.get(0);
 ```
 
 ### 4. 关系导航
 
 ```java
-// 正向关系
-document.get("attachments/content");
+// 正向关系 - 返回内容列表
+List<?> contentList = document.get("attachments/content");
 
-// 反向关系
-document.get("reviewedBy/department/manager");
+// 反向关系 - 返回管理者列表
+List<?> managerList = document.get("reviewedBy/department/manager");
+ModelObject manager = managerList.isEmpty() ? null : (ModelObject) managerList.get(0);
 ```
 
 ## 最佳实践
