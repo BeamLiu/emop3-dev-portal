@@ -110,6 +110,9 @@ mvn clean install
 cd hello-server
 java -jar target/hello-server-1.0.0-SNAPSHOT.jar
 ```
+
+使用`hello-server/src/resources/application.yml`中的数据库连接信息，检查对应的`SAMPLE.hello_task`已经创建，并且数据库表与`HelloTask.java`中的信息一致。
+
 🔔启动性能:
 
 EMOP Server启动的时候会从java class定义映射到元数据，然后再将元数据映射到数据库schema，因此启动过程比较长，第一次启动完成后，初始化了对应的数据库的schema后，可以添加三个启动参数为`true`，以加快启动速度：

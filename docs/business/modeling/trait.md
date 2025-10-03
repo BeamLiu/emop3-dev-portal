@@ -206,7 +206,7 @@ List<Department> subs = rd.queryChildren();  // 获取子节点
 #### 2.1 存储字段
 ```java
 @QuerySqlField(index = true, inlineSize = 18, notNull = true)
-@QueryTextField
+@FullTextSearchField
 private String code;             // 业务编码
 ```
 

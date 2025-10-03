@@ -169,7 +169,7 @@ public class ItemRevision extends AbstractModelObject implements Revisionable {
     public static final String ATTR_REVISION_ID = "revId";
 
     @QuerySqlField(index = true, inlineSize = 18, notNull = true)
-    @QueryTextField
+    @FullTextSearchField
     @LocalizedNameDesc(name = "编码")
     private String code;
 

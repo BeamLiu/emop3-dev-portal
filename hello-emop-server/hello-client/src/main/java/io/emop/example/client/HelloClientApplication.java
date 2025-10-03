@@ -38,7 +38,8 @@ public class HelloClientApplication {
             log.info("=== Hello EMOP Client 所有演示完成 ===");
         } catch (Exception e) {
             log.error("客户端演示执行失败", e);
+            System.exit(1);
         }
-        System.exit(1);
+        System.exit(0);
     }
 }

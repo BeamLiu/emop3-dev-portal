@@ -5,9 +5,6 @@ spring:
     serialization:
       WRITE_DATES_AS_TIMESTAMPS: false
       FAIL_ON_EMPTY_BEANS: false
-  web:
-    resources:
-      static-locations: classpath:/static/,classpath:/public/
   data:
     redis:
       host: cache-${EMOP_DOMAIN}  # Using the network alias from docker-compose

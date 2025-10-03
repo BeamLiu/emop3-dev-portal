@@ -18,5 +18,7 @@ public class HelloServerApplication {
 
     public static void main(String[] args) {
         ServerWebConsolePortable.startup(args);
+        log.info("Emop Server Started Up");
+        log.info("  - Swagger API: http://localhost:870/webconsole/api");
     }
 }
