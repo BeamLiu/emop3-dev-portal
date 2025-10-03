@@ -1,0 +1,66 @@
+spring:
+  application:
+    name: webconsole
+  jackson:
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+      FAIL_ON_EMPTY_BEANS: false
+  data:
+    redis:
+      host: cache-${EMOP_DOMAIN}  # Using the network alias from docker-compose
+      port: 6379
+      password: EmopIs2Fun!
+      database: 0
+
+server:
+  port: 870
+  servlet:
+    context-path: /${spring.application.name}
+
+springdoc:
+  swagger-ui:
+    path: /api
+
+minio:
+  endpoint: http://storage-${EMOP_DOMAIN}:9000
+  accessKey: minioadmin
+  secretKey: EmopIs2Fun!
+
+emop:
+  permission:
+    config-files:
+      - default-permission-config.yml
+  storage:
+    postgresql:
+      # DDL 操作使用的超级用户连接
+      admin:
+        host: emop-db-master-${EMOP_DOMAIN}
+        port: 5432
+        database: emop
+        schema: public
+        username: emop
+        password: EmopIs2Fun!
+        minimum-idle: 1
+        maximum-pool-size: 2
+      # DML 操作使用的应用用户连接
+      master:
+        host: emop-db-master-${EMOP_DOMAIN}
+        port: 5432
+        database: emop
+        schema: public
+        username: app_user
+        password: EmopIs2Fun!
+      pool:
+        maximum-pool-size: 20
+        minimum-idle: 5
+        connection-timeout: 30000
+        idle-timeout: 600000
+        max-lifetime: 1800000
+
+# 完整的日志配置
+logging:
+  level:
+    root: INFO
+    io.emop: DEBUG
+
+EMOP_DOMAIN: dev.emop.emopdata.com

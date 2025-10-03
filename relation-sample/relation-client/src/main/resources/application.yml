@@ -1,0 +1,8 @@
+# only necessary for service initialization, EmopConfig will read this data but not spring
+# it will also work for add the value into OS environment, JVM startup parameter
+EMOP_DOMAIN: dev.emop.emopdata.com
+
+minio:
+  endpoint: http://storage-${EMOP_DOMAIN}:9000
+  accessKey: minioadmin
+  secretKey: EmopIs2Fun!
