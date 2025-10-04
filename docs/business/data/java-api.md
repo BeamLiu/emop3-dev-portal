@@ -764,7 +764,7 @@ public class CustomTypeResolver implements TypeResolverExtension {
         if (xpath != null && xpath.startsWith("associateRelation")) {
             return "Supplier";
         }
-        String code = (String) data.get("code");
+        String code = data.get("code");
         return code != null && code.startsWith("P1-") ? "Part" : "ItemRevision";
     }
 }
