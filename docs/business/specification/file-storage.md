@@ -136,7 +136,15 @@ public ResponseEntity<Void> downloadDocument(@PathVariable Long documentId) {
 附加文件是指基于原文件生成的衍生文件，如缩略图、PDF版本、校验文件等。这些文件与原文件存储在同一目录下，通过文件扩展名来直接标识类型。
 
 ### 4.2 极简化命名规则
-支持的扩展名类型, 系统内置支持常见的安全扩展名，无需任何配置：
+
+**命名规则**：`原文件路径 + .扩展名`
+
+示例：
+- 原文件：`documents/123/report.pdf`
+- 缩略图：`documents/123/report.pdf.jpg`
+- MD5校验：`documents/123/report.pdf.md5`
+
+**支持的扩展名类型**：系统内置支持常见的安全扩展名，无需任何配置：
 `jpg, bmp, dwg, png, gif, webapp, zip, cdxfb, md5`
 
 如果需要拓展更多，请修改application.yml中 `emop.file.attachment.extensions`
@@ -147,6 +155,49 @@ public ResponseEntity<Void> downloadDocument(@PathVariable Long documentId) {
 - **极简直观**：一看扩展名就知道是什么类型的附加文件
 - **无限扩展**：支持任意安全扩展名，满足各种业务需求
 - **自动关联**：基于文件名模式自动关联，无需数据库存储关系
+- **职责分离**：MinioProxyService 负责路径构建，StorageService 负责实际存储
+
+### 4.4 附加文件上传
+
+#### 使用 RPC 方式上传附加文件
+
+业务服务通过 `MinioProxyService` 构建路径，然后使用 `StorageService` 进行上传，避免 byte[] 拷贝：
+
+```java
+@Service
+public class ThumbnailService {
+    
+    /**
+     * 为文件生成并上传缩略图
+     */
+    public void generateAndUploadThumbnail(Long fileId, InputStream thumbnailStream) {
+        // 1. 构建附加文件路径
+        String attachmentPath = S.service(MinioProxyService.class)
+            .buildAttachmentPath(fileId, "jpg");
+        
+        // 2. 使用 StorageService 上传（使用 InputStream 避免内存拷贝）
+        StorageService storageService = S.service(StorageService.class);
+        storageService.upload(attachmentPath, "", thumbnailStream, true);
+        
+        log.info("Thumbnail uploaded for file {}: {}", fileId, attachmentPath);
+    }
+}
+```
+
+#### 删除附加文件
+
+```java
+// 删除单个附加文件
+String attachmentPath = S.service(MinioProxyService.class)
+    .buildAttachmentPath(fileId, "jpg");
+S.service(StorageService.class).delete(attachmentPath);
+
+// 批量删除
+Map<Long, String> paths = S.service(MinioProxyService.class)
+    .batchBuildAttachmentPaths(fileIds, "jpg");
+StorageService storageService = S.service(StorageService.class);
+paths.values().forEach(storageService::delete);
+```
 
 ## 5. API接口
 
@@ -174,6 +225,12 @@ boolean checkAttachmentExists(Long fileId, String extension);
 
 // 批量检查附加文件
 Map<Long, Boolean> batchCheckAttachments(List<Long> fileIds, String extension);
+
+// 构建附加文件路径（配合 StorageService 使用）
+String buildAttachmentPath(Long fileId, String extension);
+
+// 批量构建附加文件路径
+Map<Long, String> batchBuildAttachmentPaths(List<Long> fileIds, String extension);
 ```
 
 ### 5.2 REST接口列表
@@ -253,11 +310,14 @@ Body: [fileId1, fileId2, ...]
 | 文件访问票据生成 | RPC优先 | 高频调用，轻量级，更好性能 |
 | 批量票据生成 | RPC优先 | 避免循环调用 |
 | 文件存在性检查 | RPC | 业务逻辑校验 |
+| 附加文件路径构建 | RPC | 轻量级操作，配合 StorageService 使用 |
+| 附加文件上传 | RPC (MinioProxyService + StorageService) | 避免 byte[] 拷贝，使用 InputStream |
 | 文件上传 | REST | 文件流传输 |
 | 文件下载 | REST | 文件流传输 |
 | 批量zip操作 | REST | 复杂文件处理 |
 | 批量文件元数据管理 | REST | 支持复杂的元数据配置和策略 |
 | 图片预览 | REST | 图片处理和缩放 |
+| 附加文件下载 | REST | 文件流传输 |
 
 ## 7. 文件元数据配置
 
@@ -367,9 +427,36 @@ public ResponseEntity<ZipUploadResult> bulkCreateDocuments(
     - UPDATE_ONLY模式下，如果fileId不存在会抛出异常
     - 文件上传成功但元数据更新失败时，文件仍会保留在存储中
 
-## 8. 最佳实践总结
+## 8. 文件存储安全机制
 
-### 8.1 设计原则
+### 8.1 路径安全设计
+
+:::warning 🔔提醒
+建议：文件存储路径包含随机字符，可选的包括：
+- `fileId`, 即`io.emop.model.document.File.id`
+- `任意业务id`, 如`io.emop.model.common.ItemRevision.id`
+- `UUID`, 可以任意语言生成的 UUID 字符串
+
+EMOP平台生成的业务对象的`id`具有唯一性和不可猜测性，平台通过这些机制对文件本身提供进一步的安全保障
+:::
+
+```java
+import java.util.UUID;
+
+// ✅ 正确的路径格式
+String correctPath = String.format("documents/%d/project-report.pdf", fileId);
+// 示例：documents/1234567890/project-report.pdf
+
+String correctPath = String.format("documents/%s/project-report.pdf", UUID.randomUUID());
+// 示例：documents/xxxx-xxxx-xxx-xxx/project-report.pdf
+
+// ❌ 错误的路径格式 - 缺少随机性路径
+String wrongPath = "documents/project-report.pdf";
+```
+
+## 9. 最佳实践总结
+
+### 9.1 设计原则
 
 1. **单一职责**：业务服务专注业务逻辑，文件服务专注文件处理
 2. **松耦合**：通过文件ID建立松耦合的关联关系
@@ -377,4 +464,50 @@ public ResponseEntity<ZipUploadResult> bulkCreateDocuments(
 4. **性能优先**：利用预签名URL实现高性能的直接访问
 
 ---
-**优先使用RPC接口进行轻量级文件操作，使用REST API处理复杂的文件传输和元数据管理。业务应用专注于业务逻辑，将文件处理委托给专业的文件服务！**
+
+## 10. 附加文件最佳实践
+
+### 10.1 推荐的使用模式
+
+**服务端生成附加文件**（推荐）：
+```java
+// 1. 使用 MinioProxyService 构建路径
+String attachmentPath = S.service(MinioProxyService.class)
+    .buildAttachmentPath(fileId, "jpg");
+
+// 2. 使用 StorageService 上传（InputStream 避免内存拷贝）
+S.service(StorageService.class)
+    .upload(attachmentPath, "", thumbnailInputStream, true);
+```
+
+**批量操作**：
+```java
+// 批量构建路径
+Map<Long, String> paths = S.service(MinioProxyService.class)
+    .batchBuildAttachmentPaths(fileIds, "jpg");
+
+// 批量上传
+paths.forEach((fileId, path) -> {
+    S.service(StorageService.class)
+        .upload(path, "", generateThumbnail(fileId), true);
+});
+```
+
+### 10.2 性能优化建议
+
+1. **使用 InputStream** - 避免将整个文件加载到内存
+2. **批量操作** - 使用批量接口减少 RPC 调用
+3. **异步处理** - 附加文件生成可以异步进行
+4. **按需生成** - 只在需要时生成附加文件
+
+### 10.3 常见场景
+
+| 场景 | 扩展名 | 说明 |
+|------|--------|------|
+| 图片缩略图 | jpg, png | 用于列表展示 |
+| 文件校验 | md5, sha256 | 完整性验证 |
+| 格式转换 | pdf, webp | 兼容性处理 |
+| 预览图 | jpg, png | 快速预览 |
+
+---
+**优先使用RPC接口进行轻量级文件操作，使用REST API处理复杂的文件传输和元数据管理。附加文件上传使用 MinioProxyService + StorageService 组合，避免内存拷贝。业务应用专注于业务逻辑，将文件处理委托给专业的文件服务！**
