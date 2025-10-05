@@ -3,17 +3,15 @@ package io.emop.example.filestorage.usecase;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.emop.service.config.EMOPConfig;
+import kong.unirest.Unirest;
+import kong.unirest.HttpResponse;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 批量文件操作演示
@@ -29,16 +27,14 @@ public class BatchOperationsDemo {
     private static final String MINIO_PROXY_BASE_URL = "http://minioproxy-" +
             EMOPConfig.getInstance().getString("EMOP_DOMAIN", "dev.emop.emopdata.com") + ":9003/minioproxy/api";
 
-    private final OkHttpClient httpClient;
     private final ObjectMapper objectMapper;
 
     public BatchOperationsDemo() {
-        this.httpClient = new OkHttpClient.Builder()
-                .connectTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(120, TimeUnit.SECONDS)
-                .writeTimeout(120, TimeUnit.SECONDS)
-                .build();
         this.objectMapper = new ObjectMapper();
+        // 配置 Unirest
+        Unirest.config()
+                .connectTimeout(30000)
+                .socketTimeout(120000);
     }
 
     /**
@@ -194,39 +190,23 @@ public class BatchOperationsDemo {
     private JsonNode bulkUploadZip(java.io.File zipFile, String bucket, String basePath,
                                    String strategy, String fileMetadataConfig) throws IOException {
 
-        HttpUrl.Builder urlBuilder = HttpUrl.parse(MINIO_PROXY_BASE_URL + "/file/bulk-upload-zip")
-                .newBuilder()
-                .addQueryParameter("bucket", bucket)
-                .addQueryParameter("basePath", basePath)
-                .addQueryParameter("strategy", strategy);
+        HttpResponse<String> response = Unirest.post(MINIO_PROXY_BASE_URL + "/file/bulk-upload-zip")
+                .header("x-user", "{\"userId\":-1,\"authorities\":[\"ADMIN\"]}")
+                .queryString("bucket", bucket)
+                .queryString("basePath", basePath)
+                .queryString("strategy", strategy)
+                .queryString("fileMetadataConfig", fileMetadataConfig)
+                .field("file", zipFile)
+                .asString();
 
-        if (fileMetadataConfig != null && !fileMetadataConfig.isEmpty()) {
-            urlBuilder.addQueryParameter("fileMetadataConfig", fileMetadataConfig);
-        }
-
-        RequestBody fileBody = RequestBody.create(zipFile, MediaType.parse("application/zip"));
-        RequestBody requestBody = new MultipartBody.Builder()
-                .setType(MultipartBody.FORM)
-                .addFormDataPart("file", zipFile.getName(), fileBody)
-                .build();
-
-        Request request = builderWithAuthHeader()
-                .url(urlBuilder.build())
-                .post(requestBody)
-                .build();
-
-        try (Response response = httpClient.newCall(request).execute()) {
-            String responseBody = response.body().string();
-
-            if (!response.isSuccessful()) {
-                log.error("批量ZIP上传失败 - HTTP {}: {}", response.code(), responseBody);
-                throw new IOException("HTTP " + response.code() + ": " + responseBody);
-            }
-
+        if (response.isSuccess()) {
+            String responseBody = response.getBody();
             log.info("result: {}", responseBody);
-            JsonNode result = objectMapper.readTree(responseBody);
             log.info("批量ZIP上传成功！");
-            return result;
+            return objectMapper.readTree(responseBody);
+        } else {
+            log.error("批量ZIP上传失败 - HTTP {}: {}", response.getStatus(), response.getBody());
+            throw new IOException("HTTP " + response.getStatus() + ": " + response.getBody());
         }
     }
 
@@ -234,26 +214,18 @@ public class BatchOperationsDemo {
      * 按文件ID批量下载为ZIP
      */
     private byte[] bulkDownloadByIdsZip(List<Long> fileIds, String zipFileName) throws IOException {
-        HttpUrl url = HttpUrl.parse(MINIO_PROXY_BASE_URL + "/file/bulk-download-by-ids-zip")
-                .newBuilder()
-                .addQueryParameter("zipFileName", zipFileName)
-                .build();
+        HttpResponse<byte[]> response = Unirest.post(MINIO_PROXY_BASE_URL + "/file/bulk-download-by-ids-zip")
+                .header("x-user", "{\"userId\":-1,\"authorities\":[\"ADMIN\"]}")
+                .header("Content-Type", "application/json")
+                .queryString("zipFileName", zipFileName)
+                .body(fileIds)
+                .asBytes();
 
-        String jsonBody = objectMapper.writeValueAsString(fileIds);
-
-        Request request = builderWithAuthHeader()
-                .url(url)
-                .post(RequestBody.create(jsonBody, MediaType.get("application/json")))
-                .build();
-
-        try (Response response = httpClient.newCall(request).execute()) {
-            if (!response.isSuccessful()) {
-                String errorBody = response.body().string();
-                log.error("按ID批量下载失败 - HTTP {}: {}", response.code(), errorBody);
-                throw new IOException("HTTP " + response.code() + ": " + errorBody);
-            }
-
-            return response.body().bytes();
+        if (response.isSuccess()) {
+            return response.getBody();
+        } else {
+            log.error("按ID批量下载失败 - HTTP {}: {}", response.getStatus(), response.getStatusText());
+            throw new IOException("HTTP " + response.getStatus() + ": " + response.getStatusText());
         }
     }
 
@@ -262,28 +234,20 @@ public class BatchOperationsDemo {
      */
     private byte[] bulkDownloadByPathsZip(String bucket, String basePath,
                                           List<String> filePaths, String zipFileName) throws IOException {
-        HttpUrl url = HttpUrl.parse(MINIO_PROXY_BASE_URL + "/file/bulk-download-zip")
-                .newBuilder()
-                .addQueryParameter("bucket", bucket)
-                .addQueryParameter("basePath", basePath)
-                .addQueryParameter("zipFileName", zipFileName)
-                .build();
+        HttpResponse<byte[]> response = Unirest.post(MINIO_PROXY_BASE_URL + "/file/bulk-download-zip")
+                .header("x-user", "{\"userId\":-1,\"authorities\":[\"ADMIN\"]}")
+                .header("Content-Type", "application/json")
+                .queryString("bucket", bucket)
+                .queryString("basePath", basePath)
+                .queryString("zipFileName", zipFileName)
+                .body(filePaths)
+                .asBytes();
 
-        String jsonBody = objectMapper.writeValueAsString(filePaths);
-
-        Request request = builderWithAuthHeader()
-                .url(url)
-                .post(RequestBody.create(jsonBody, MediaType.get("application/json")))
-                .build();
-
-        try (Response response = httpClient.newCall(request).execute()) {
-            if (!response.isSuccessful()) {
-                String errorBody = response.body().string();
-                log.error("按路径批量下载失败 - HTTP {}: {}", response.code(), errorBody);
-                throw new IOException("HTTP " + response.code() + ": " + errorBody);
-            }
-
-            return response.body().bytes();
+        if (response.isSuccess()) {
+            return response.getBody();
+        } else {
+            log.error("按路径批量下载失败 - HTTP {}: {}", response.getStatus(), response.getStatusText());
+            throw new IOException("HTTP " + response.getStatus() + ": " + response.getStatusText());
         }
     }
 
@@ -292,27 +256,19 @@ public class BatchOperationsDemo {
      */
     private byte[] downloadDirectoryZip(String bucket, String basePath,
                                         String zipFileName, boolean includeSubdirectories) throws IOException {
-        HttpUrl url = HttpUrl.parse(MINIO_PROXY_BASE_URL + "/file/download-directory-zip")
-                .newBuilder()
-                .addQueryParameter("bucket", bucket)
-                .addQueryParameter("basePath", basePath)
-                .addQueryParameter("zipFileName", zipFileName)
-                .addQueryParameter("includeSubdirectories", String.valueOf(includeSubdirectories))
-                .build();
+        HttpResponse<byte[]> response = Unirest.get(MINIO_PROXY_BASE_URL + "/file/download-directory-zip")
+                .header("x-user", "{\"userId\":-1,\"authorities\":[\"ADMIN\"]}")
+                .queryString("bucket", bucket)
+                .queryString("basePath", basePath)
+                .queryString("zipFileName", zipFileName)
+                .queryString("includeSubdirectories", includeSubdirectories)
+                .asBytes();
 
-        Request request = builderWithAuthHeader()
-                .url(url)
-                .get()
-                .build();
-
-        try (Response response = httpClient.newCall(request).execute()) {
-            if (!response.isSuccessful()) {
-                String errorBody = response.body().string();
-                log.error("目录下载失败 - HTTP {}: {}", response.code(), errorBody);
-                throw new IOException("HTTP " + response.code() + ": " + errorBody);
-            }
-
-            return response.body().bytes();
+        if (response.isSuccess()) {
+            return response.getBody();
+        } else {
+            log.error("目录下载失败 - HTTP {}: {}", response.getStatus(), response.getStatusText());
+            throw new IOException("HTTP " + response.getStatus() + ": " + response.getStatusText());
         }
     }
 
@@ -402,7 +358,4 @@ public class BatchOperationsDemo {
         }
     }
 
-    private okhttp3.Request.Builder builderWithAuthHeader() {
-        return new Request.Builder().header("x-user", "{\"userId\":-1,\"authorities\":[\"ADMIN\"]}");
-    }
 }

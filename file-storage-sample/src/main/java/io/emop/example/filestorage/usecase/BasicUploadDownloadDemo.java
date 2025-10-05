@@ -1,23 +1,20 @@
 package io.emop.example.filestorage.usecase;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.emop.model.common.UserContext;
 import io.emop.model.document.File;
 import io.emop.service.S;
 import io.emop.service.api.data.ObjectService;
 import io.emop.service.api.storage.StorageService;
 import io.emop.service.config.EMOPConfig;
+import kong.unirest.JsonNode;
+import kong.unirest.Unirest;
+import kong.unirest.HttpResponse;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 基础文件上传下载演示
@@ -33,16 +30,11 @@ public class BasicUploadDownloadDemo {
     private static final String MINIO_PROXY_BASE_URL = "http://" +
             EMOPConfig.getInstance().getString("EMOP_DOMAIN", "dev.emop.emopdata.com") + ":9003/minioproxy/api";
 
-    private final OkHttpClient httpClient;
-    private final ObjectMapper objectMapper;
-
     public BasicUploadDownloadDemo() {
-        this.httpClient = new OkHttpClient.Builder()
-                .connectTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(60, TimeUnit.SECONDS)
-                .writeTimeout(60, TimeUnit.SECONDS)
-                .build();
-        this.objectMapper = new ObjectMapper();
+        // 配置 Unirest
+        Unirest.config()
+                .connectTimeout(30000)
+                .socketTimeout(60000);
     }
 
     /**
@@ -152,27 +144,16 @@ public class BasicUploadDownloadDemo {
      * 获取临时上传票据
      */
     private String getUploadTicket(String filename, int expiryMinutes) throws IOException {
-        HttpUrl url = HttpUrl.parse(MINIO_PROXY_BASE_URL + "/file/upload-ticket")
-                .newBuilder()
-                .addQueryParameter("filename", filename)
-                .addQueryParameter("expiryMinutes", String.valueOf(expiryMinutes))
-                .build();
+        HttpResponse<JsonNode> response = Unirest.get(MINIO_PROXY_BASE_URL + "/file/upload-ticket")
+                .queryString("filename", filename)
+                .queryString("expiryMinutes", expiryMinutes)
+                .asJson();
 
-        Request request = new Request.Builder()
-                .url(url)
-                .get()
-                .build();
-
-        try (Response response = httpClient.newCall(request).execute()) {
-            String responseBody = response.body().string();
-
-            if (!response.isSuccessful()) {
-                log.error("获取上传票据失败 - HTTP {}: {}", response.code(), responseBody);
-                throw new IOException("HTTP " + response.code() + ": " + responseBody);
-            }
-
-            JsonNode jsonNode = objectMapper.readTree(responseBody);
-            return jsonNode.get("url").asText();
+        if (response.isSuccess()) {
+            return response.getBody().getObject().getString("url");
+        } else {
+            log.error("获取上传票据失败 - HTTP {}: {}", response.getStatus(), response.getBody());
+            throw new IOException("HTTP " + response.getStatus() + ": " + response.getBody());
         }
     }
 
@@ -180,29 +161,18 @@ public class BasicUploadDownloadDemo {
      * 获取直接上传票据
      */
     private String getDirectUploadTicket(String bucket, String targetPath, String filename, int expiryMinutes) throws IOException {
-        HttpUrl url = HttpUrl.parse(MINIO_PROXY_BASE_URL + "/file/direct-upload-ticket")
-                .newBuilder()
-                .addQueryParameter("bucket", bucket)
-                .addQueryParameter("targetPath", targetPath)
-                .addQueryParameter("filename", filename)
-                .addQueryParameter("expiryMinutes", String.valueOf(expiryMinutes))
-                .build();
+        HttpResponse<JsonNode> response = Unirest.get(MINIO_PROXY_BASE_URL + "/file/direct-upload-ticket")
+                .queryString("bucket", bucket)
+                .queryString("targetPath", targetPath)
+                .queryString("filename", filename)
+                .queryString("expiryMinutes", expiryMinutes)
+                .asJson();
 
-        Request request = new Request.Builder()
-                .url(url)
-                .get()
-                .build();
-
-        try (Response response = httpClient.newCall(request).execute()) {
-            String responseBody = response.body().string();
-
-            if (!response.isSuccessful()) {
-                log.error("获取直接上传票据失败 - HTTP {}: {}", response.code(), responseBody);
-                throw new IOException("HTTP " + response.code() + ": " + responseBody);
-            }
-
-            JsonNode jsonNode = objectMapper.readTree(responseBody);
-            return jsonNode.get("url").asText();
+        if (response.isSuccess()) {
+            return response.getBody().getObject().getString("url");
+        } else {
+            log.error("获取直接上传票据失败 - HTTP {}: {}", response.getStatus(), response.getBody());
+            throw new IOException("HTTP " + response.getStatus() + ": " + response.getBody());
         }
     }
 
@@ -210,27 +180,16 @@ public class BasicUploadDownloadDemo {
      * 获取文件访问票据
      */
     private String getFileAccessTicket(Long fileId, int expiryMinutes, boolean fullInternalPath) throws IOException {
-        HttpUrl url = HttpUrl.parse(MINIO_PROXY_BASE_URL + "/file/" + fileId + "/access-ticket")
-                .newBuilder()
-                .addQueryParameter("expiryMinutes", String.valueOf(expiryMinutes))
-                .addQueryParameter("fullInternalPath", String.valueOf(fullInternalPath))
-                .build();
+        HttpResponse<JsonNode> response = Unirest.get(MINIO_PROXY_BASE_URL + "/file/" + fileId + "/access-ticket")
+                .queryString("expiryMinutes", expiryMinutes)
+                .queryString("fullInternalPath", fullInternalPath)
+                .asJson();
 
-        Request request = new Request.Builder()
-                .url(url)
-                .get()
-                .build();
-
-        try (Response response = httpClient.newCall(request).execute()) {
-            String responseBody = response.body().string();
-
-            if (!response.isSuccessful()) {
-                log.error("获取文件访问票据失败 - HTTP {}: {}", response.code(), responseBody);
-                throw new IOException("HTTP " + response.code() + ": " + responseBody);
-            }
-
-            JsonNode jsonNode = objectMapper.readTree(responseBody);
-            return jsonNode.get("url").asText();
+        if (response.isSuccess()) {
+            return response.getBody().getObject().getString("url");
+        } else {
+            log.error("获取文件访问票据失败 - HTTP {}: {}", response.getStatus(), response.getBody());
+            throw new IOException("HTTP " + response.getStatus() + ": " + response.getBody());
         }
     }
 
@@ -246,21 +205,15 @@ public class BasicUploadDownloadDemo {
 
         log.info("从票据URL下载文件: {}", fullUrl);
 
-        Request request = new Request.Builder()
-                .url(fullUrl)
-                .get()
-                .build();
+        HttpResponse<byte[]> response = Unirest.get(fullUrl).asBytes();
 
-        try (Response response = httpClient.newCall(request).execute()) {
-            if (!response.isSuccessful()) {
-                String responseBody = response.body() != null ? response.body().string() : "";
-                log.error("文件下载失败 - HTTP {}: {}", response.code(), responseBody);
-                throw new IOException("文件下载失败: HTTP " + response.code() + ": " + responseBody);
-            }
-            
-            byte[] content = response.body().bytes();
+        if (response.isSuccess()) {
+            byte[] content = response.getBody();
             log.info("文件下载成功，大小: {} bytes", content.length);
             return content;
+        } else {
+            log.error("文件下载失败 - HTTP {}: {}", response.getStatus(), response.getStatusText());
+            throw new IOException("文件下载失败: HTTP " + response.getStatus() + ": " + response.getStatusText());
         }
     }
 
@@ -347,21 +300,16 @@ public class BasicUploadDownloadDemo {
 
         log.info("上传文件到URL: {}", fullUrl);
 
-        RequestBody requestBody = RequestBody.create(fileContent, MediaType.parse("application/octet-stream"));
+        HttpResponse<String> response = Unirest.put(fullUrl)
+                .header("Content-Type", "application/octet-stream")
+                .body(fileContent)
+                .asString();
 
-        Request request = new Request.Builder()
-                .url(fullUrl)
-                .put(requestBody)
-                .addHeader("Content-Type", "application/octet-stream")
-                .build();
-
-        try (Response response = httpClient.newCall(request).execute()) {
-            if (!response.isSuccessful()) {
-                String responseBody = response.body() != null ? response.body().string() : "";
-                log.error("文件上传失败 - HTTP {}: {}", response.code(), responseBody);
-                throw new IOException("文件上传失败: HTTP " + response.code() + ": " + responseBody);
-            }
+        if (response.isSuccess()) {
             log.info("文件 {} 上传成功", filename);
+        } else {
+            log.error("文件上传失败 - HTTP {}: {}", response.getStatus(), response.getBody());
+            throw new IOException("文件上传失败: HTTP " + response.getStatus() + ": " + response.getBody());
         }
     }
 

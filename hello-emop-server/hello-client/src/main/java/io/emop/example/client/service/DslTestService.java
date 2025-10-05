@@ -6,7 +6,6 @@ import io.emop.service.S;
 import io.emop.service.api.dsl.DSLExecutionService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.*;
 
 /**
  * DSL 演示服务
@@ -14,16 +13,6 @@ import okhttp3.*;
  */
 @Slf4j
 public class DslTestService {
-
-    private final OkHttpClient httpClient;
-    private final ObjectMapper objectMapper;
-    private final String serverUrl;
-
-    public DslTestService(String serverUrl) {
-        this.httpClient = new OkHttpClient();
-        this.objectMapper = new ObjectMapper();
-        this.serverUrl = serverUrl;
-    }
 
     /**
      * 执行所有DSL演示

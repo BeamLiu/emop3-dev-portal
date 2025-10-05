@@ -31,7 +31,7 @@ public class HelloClientApplication {
 
             // 3. DSL 数据操作演示
             log.info("--- 开始 DSL 数据操作演示 ---");
-            DslTestService dslTestService = new DslTestService("http://localhost:870");
+            DslTestService dslTestService = new DslTestService();
             dslTestService.runAll();
             log.info("--- DSL 数据操作演示完成 ---");
 

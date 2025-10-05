@@ -1,10 +1,9 @@
 package io.emop.example.relation.client.demo;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import kong.unirest.Unirest;
+import kong.unirest.HttpResponse;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.*;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -17,14 +16,14 @@ import java.util.Map;
 @Slf4j
 public class RestApiDemo {
 
-    private final OkHttpClient httpClient;
-    private final ObjectMapper objectMapper;
     private final String baseUrl = "http://localhost:870/webconsole/api";
     private final String timestamp = String.valueOf(System.currentTimeMillis());
 
     public RestApiDemo() {
-        this.httpClient = new OkHttpClient();
-        this.objectMapper = new ObjectMapper();
+        // 配置 Unirest
+        Unirest.config()
+                .setDefaultHeader("x-user", "{\"userId\":-1,\"authorities\":[\"ADMIN\"]}")
+                .setDefaultHeader("Content-Type", "application/json");
     }
 
     @SneakyThrows
@@ -41,10 +40,6 @@ public class RestApiDemo {
         updateProject(projectId);
     }
 
-    private Request.Builder builderWithAuthHeader() {
-        return new Request.Builder().header("x-user", "{\"userId\":-1,\"authorities\":[\"ADMIN\"]}");
-    }
-
     /**
      * 创建项目
      */
@@ -58,26 +53,17 @@ public class RestApiDemo {
         projectData.put("projectManager", "REST管理员");
         projectData.put("status", "PLANNING");
 
-        String json = objectMapper.writeValueAsString(Map.of("data", projectData));
-        RequestBody body = RequestBody.create(json, MediaType.get("application/json"));
+        HttpResponse<kong.unirest.JsonNode> response = Unirest.post(baseUrl + "/data/RSampleProject")
+                .body(Map.of("data", projectData))
+                .asJson();
 
-        Request request = builderWithAuthHeader()
-                .url(baseUrl + "/data/RSampleProject")
-                .post(body)
-                .build();
-
-        try (Response response = httpClient.newCall(request).execute()) {
-            if (response.isSuccessful() && response.body() != null) {
-                String responseBody = response.body().string();
-                JsonNode jsonNode = objectMapper.readTree(responseBody);
-                Long projectId = jsonNode.get("id").asLong();
-                log.info("项目创建成功，ID: {}", projectId);
-                return projectId;
-            } else {
-                String errorBody = response.body() != null ? response.body().string() : "No response body";
-                log.error("创建项目失败，状态码: {}, 响应体: {}", response.code(), errorBody);
-                throw new RuntimeException("创建项目失败，状态码: " + response.code() + ", 响应体: " + errorBody);
-            }
+        if (response.isSuccess()) {
+            Long projectId = response.getBody().getObject().getLong("id");
+            log.info("项目创建成功，ID: {}", projectId);
+            return projectId;
+        } else {
+            log.error("创建项目失败，状态码: {}, 响应体: {}", response.getStatus(), response.getBody());
+            throw new RuntimeException("创建项目失败，状态码: " + response.getStatus() + ", 响应体: " + response.getBody());
         }
     }
 
@@ -100,26 +86,17 @@ public class RestApiDemo {
         taskData.put("priority", "HIGH");
         taskData.put("projectId", projectId);
 
-        String json = objectMapper.writeValueAsString(Map.of("data", taskData));
-        RequestBody body = RequestBody.create(json, MediaType.get("application/json"));
+        HttpResponse<kong.unirest.JsonNode> response = Unirest.post(baseUrl + "/data/RSampleTask")
+                .body(Map.of("data", taskData))
+                .asJson();
 
-        Request request = builderWithAuthHeader()
-                .url(baseUrl + "/data/RSampleTask")
-                .post(body)
-                .build();
-
-        try (Response response = httpClient.newCall(request).execute()) {
-            if (response.isSuccessful() && response.body() != null) {
-                String responseBody = response.body().string();
-                JsonNode jsonNode = objectMapper.readTree(responseBody);
-                Long taskId = jsonNode.get("id").asLong();
-                log.info("任务创建成功，ID: {}", taskId);
-                return taskId;
-            } else {
-                String errorBody = response.body() != null ? response.body().string() : "No response body";
-                log.error("创建任务失败，状态码: {}, 响应体: {}", response.code(), errorBody);
-                throw new RuntimeException("创建任务失败，状态码: " + response.code() + ", 响应体: " + errorBody);
-            }
+        if (response.isSuccess()) {
+            Long taskId = response.getBody().getObject().getLong("id");
+            log.info("任务创建成功，ID: {}", taskId);
+            return taskId;
+        } else {
+            log.error("创建任务失败，状态码: {}, 响应体: {}", response.getStatus(), response.getBody());
+            throw new RuntimeException("创建任务失败，状态码: " + response.getStatus() + ", 响应体: " + response.getBody());
         }
     }
 
@@ -137,22 +114,15 @@ public class RestApiDemo {
         updateData.put("name", "REST API演示项目 - 已更新");
         updateData.put("status", "IN_PROGRESS");
 
-        String json = objectMapper.writeValueAsString(Map.of("data", updateData, "_version", 2));
-        RequestBody body = RequestBody.create(json, MediaType.get("application/json"));
+        HttpResponse<String> response = Unirest.put(baseUrl + "/data/" + projectId)
+                .body(Map.of("data", updateData, "_version", 2))
+                .asString();
 
-        Request request = builderWithAuthHeader()
-                .url(baseUrl + "/data/" + projectId)
-                .put(body)
-                .build();
-
-        try (Response response = httpClient.newCall(request).execute()) {
-            if (response.isSuccessful()) {
-                log.info("项目更新成功");
-            } else {
-                String errorBody = response.body() != null ? response.body().string() : "No response body";
-                log.error("更新项目失败，状态码: {}, 响应体: {}", response.code(), errorBody);
-                throw new RuntimeException("更新项目失败，状态码: " + response.code() + ", 响应体: " + errorBody);
-            }
+        if (response.isSuccess()) {
+            log.info("项目更新成功");
+        } else {
+            log.error("更新项目失败，状态码: {}, 响应体: {}", response.getStatus(), response.getBody());
+            throw new RuntimeException("更新项目失败，状态码: " + response.getStatus() + ", 响应体: " + response.getBody());
         }
     }
 }

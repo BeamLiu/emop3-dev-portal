@@ -27,9 +27,9 @@
         
         <!-- HTTP Client for REST API calls -->
         <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
-            <version>4.12.0</version>
+            <groupId>com.konghq</groupId>
+            <artifactId>unirest-java</artifactId>
+            <version>3.14.5</version>
         </dependency>
         
         <!-- Jackson for JSON processing -->

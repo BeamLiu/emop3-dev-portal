@@ -1,9 +1,8 @@
 package io.emop.example.client.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import kong.unirest.Unirest;
+import kong.unirest.HttpResponse;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.*;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -16,14 +15,14 @@ import java.util.Map;
 @Slf4j
 public class RestApiTestService {
 
-    private final OkHttpClient httpClient;
-    private final ObjectMapper objectMapper;
     private final String serverUrl;
 
     public RestApiTestService(String serverUrl) {
-        this.httpClient = new OkHttpClient();
-        this.objectMapper = new ObjectMapper();
         this.serverUrl = serverUrl;
+        // 配置 Unirest
+        Unirest.config()
+                .setDefaultHeader("x-user", "{\"userId\":-1,\"authorities\":[\"ADMIN\"]}")
+                .setDefaultHeader("Content-Type", "application/json");
     }
 
     /**
@@ -85,10 +84,6 @@ public class RestApiTestService {
         queryTypeDefinitions();
     }
 
-    private okhttp3.Request.Builder builderWithAuthHeader() {
-        return new Request.Builder().header("x-user", "{\"userId\":-1,\"authorities\":[\"ADMIN\"]}");
-    }
-
     /**
      * 创建任务
      */
@@ -100,26 +95,17 @@ public class RestApiTestService {
         taskData.put("revId", "A");
         taskData.put("title", "演示任务 " + taskData.get("code"));
 
-        String json = objectMapper.writeValueAsString(Map.of("data", taskData));
-        RequestBody body = RequestBody.create(json, MediaType.get("application/json"));
+        HttpResponse<kong.unirest.JsonNode> response = Unirest.post(serverUrl + "/webconsole/api/data/HelloTask")
+                .body(Map.of("data", taskData))
+                .asJson();
 
-        Request request = builderWithAuthHeader()
-                .url(serverUrl + "/webconsole/api/data/HelloTask")
-                .post(body)
-                .build();
-
-        try (Response response = httpClient.newCall(request).execute()) {
-            if (response.isSuccessful() && response.body() != null) {
-                String responseBody = response.body().string();
-                JsonNode jsonNode = objectMapper.readTree(responseBody);
-                Long taskId = jsonNode.get("id").asLong();
-                log.info("创建任务成功，ID: {}", taskId);
-                return taskId;
-            } else {
-                String errorBody = response.body() != null ? response.body().string() : "No response body";
-                log.error("创建任务失败，状态码: {}, 响应体: {}", response.code(), errorBody);
-                throw new RuntimeException("创建任务失败，状态码: " + response.code() + ", 响应体: " + errorBody);
-            }
+        if (response.isSuccess()) {
+            Long taskId = response.getBody().getObject().getLong("id");
+            log.info("创建任务成功，ID: {}", taskId);
+            return taskId;
+        } else {
+            log.error("创建任务失败，状态码: {}, 响应体: {}", response.getStatus(), response.getBody());
+            throw new RuntimeException("创建任务失败，状态码: " + response.getStatus() + ", 响应体: " + response.getBody());
         }
     }
 
@@ -127,20 +113,14 @@ public class RestApiTestService {
      * 查询任务
      */
     private void queryTask(Long taskId) throws IOException {
-        Request request = builderWithAuthHeader()
-                .url(serverUrl + "/webconsole/api/data/" + taskId)
-                .get()
-                .build();
+        HttpResponse<String> response = Unirest.get(serverUrl + "/webconsole/api/data/" + taskId)
+                .asString();
 
-        try (Response response = httpClient.newCall(request).execute()) {
-            if (response.isSuccessful() && response.body() != null) {
-                String responseBody = response.body().string();
-                log.info("查询任务成功: {}", responseBody);
-            } else {
-                String errorBody = response.body() != null ? response.body().string() : "No response body";
-                log.error("查询任务失败，状态码: {}, 响应体: {}", response.code(), errorBody);
-                throw new RuntimeException("查询任务失败，状态码: " + response.code() + ", 响应体: " + errorBody);
-            }
+        if (response.isSuccess()) {
+            log.info("查询任务成功: {}", response.getBody());
+        } else {
+            log.error("查询任务失败，状态码: {}, 响应体: {}", response.getStatus(), response.getBody());
+            throw new RuntimeException("查询任务失败，状态码: " + response.getStatus() + ", 响应体: " + response.getBody());
         }
     }
 
@@ -153,22 +133,15 @@ public class RestApiTestService {
         updateData.put("description", "通过REST API更新的任务描述");
         updateData.put("status", "COMPLETED");
 
-        String json = objectMapper.writeValueAsString(Map.of("data", updateData, "_version", 2));
-        RequestBody body = RequestBody.create(json, MediaType.get("application/json"));
+        HttpResponse<String> response = Unirest.put(serverUrl + "/webconsole/api/data/" + taskId)
+                .body(Map.of("data", updateData, "_version", 2))
+                .asString();
 
-        Request request = builderWithAuthHeader()
-                .url(serverUrl + "/webconsole/api/data/" + taskId)
-                .put(body)
-                .build();
-
-        try (Response response = httpClient.newCall(request).execute()) {
-            if (response.isSuccessful()) {
-                log.info("更新任务成功，ID: {}", taskId);
-            } else {
-                String errorBody = response.body() != null ? response.body().string() : "No response body";
-                log.error("更新任务失败，状态码: {}, 响应体: {}", response.code(), errorBody);
-                throw new RuntimeException("更新任务失败，状态码: " + response.code() + ", 响应体: " + errorBody);
-            }
+        if (response.isSuccess()) {
+            log.info("更新任务成功，ID: {}", taskId);
+        } else {
+            log.error("更新任务失败，状态码: {}, 响应体: {}", response.getStatus(), response.getBody());
+            throw new RuntimeException("更新任务失败，状态码: " + response.getStatus() + ", 响应体: " + response.getBody());
         }
     }
 
@@ -176,19 +149,14 @@ public class RestApiTestService {
      * 删除任务
      */
     private void deleteTask(Long taskId) throws IOException {
-        Request request = builderWithAuthHeader()
-                .url(serverUrl + "/webconsole/api/data/" + taskId)
-                .delete()
-                .build();
+        HttpResponse<String> response = Unirest.delete(serverUrl + "/webconsole/api/data/" + taskId)
+                .asString();
 
-        try (Response response = httpClient.newCall(request).execute()) {
-            if (response.isSuccessful()) {
-                log.info("删除任务成功，ID: {}", taskId);
-            } else {
-                String errorBody = response.body() != null ? response.body().string() : "No response body";
-                log.error("删除任务失败，状态码: {}, 响应体: {}", response.code(), errorBody);
-                throw new RuntimeException("删除任务失败，状态码: " + response.code() + ", 响应体: " + errorBody);
-            }
+        if (response.isSuccess()) {
+            log.info("删除任务成功，ID: {}", taskId);
+        } else {
+            log.error("删除任务失败，状态码: {}, 响应体: {}", response.getStatus(), response.getBody());
+            throw new RuntimeException("删除任务失败，状态码: " + response.getStatus() + ", 响应体: " + response.getBody());
         }
     }
 
@@ -200,23 +168,15 @@ public class RestApiTestService {
         queryData.put("page", 0);
         queryData.put("size", 10);
 
-        String json = objectMapper.writeValueAsString(queryData);
-        RequestBody body = RequestBody.create(json, MediaType.get("application/json"));
+        HttpResponse<String> response = Unirest.post(serverUrl + "/webconsole/api/data/query/HelloTask/page")
+                .body(queryData)
+                .asString();
 
-        Request request = builderWithAuthHeader()
-                .url(serverUrl + "/webconsole/api/data/query/HelloTask/page")
-                .post(body)
-                .build();
-
-        try (Response response = httpClient.newCall(request).execute()) {
-            if (response.isSuccessful() && response.body() != null) {
-                String responseBody = response.body().string();
-                log.info("分页查询成功: {}", responseBody);
-            } else {
-                String errorBody = response.body() != null ? response.body().string() : "No response body";
-                log.error("分页查询失败，状态码: {}, 响应体: {}", response.code(), errorBody);
-                throw new RuntimeException("分页查询失败，状态码: " + response.code() + ", 响应体: " + errorBody);
-            }
+        if (response.isSuccess()) {
+            log.info("分页查询成功: {}", response.getBody());
+        } else {
+            log.error("分页查询失败，状态码: {}, 响应体: {}", response.getStatus(), response.getBody());
+            throw new RuntimeException("分页查询失败，状态码: " + response.getStatus() + ", 响应体: " + response.getBody());
         }
     }
 
@@ -229,23 +189,15 @@ public class RestApiTestService {
                 Map.of("field", "status", "operator", "EQUALS", "value", "ACTIVE")
         });
 
-        String json = objectMapper.writeValueAsString(queryData);
-        RequestBody body = RequestBody.create(json, MediaType.get("application/json"));
+        HttpResponse<String> response = Unirest.post(serverUrl + "/webconsole/api/data/query/HelloTask")
+                .body(queryData)
+                .asString();
 
-        Request request = builderWithAuthHeader()
-                .url(serverUrl + "/webconsole/api/data/query/HelloTask")
-                .post(body)
-                .build();
-
-        try (Response response = httpClient.newCall(request).execute()) {
-            if (response.isSuccessful() && response.body() != null) {
-                String responseBody = response.body().string();
-                log.info("条件查询成功: {}", responseBody);
-            } else {
-                String errorBody = response.body() != null ? response.body().string() : "No response body";
-                log.error("条件查询失败，状态码: {}, 响应体: {}", response.code(), errorBody);
-                throw new RuntimeException("条件查询失败，状态码: " + response.code() + ", 响应体: " + errorBody);
-            }
+        if (response.isSuccess()) {
+            log.info("条件查询成功: {}", response.getBody());
+        } else {
+            log.error("条件查询失败，状态码: {}, 响应体: {}", response.getStatus(), response.getBody());
+            throw new RuntimeException("条件查询失败，状态码: " + response.getStatus() + ", 响应体: " + response.getBody());
         }
     }
 
@@ -253,20 +205,14 @@ public class RestApiTestService {
      * 查询类型定义
      */
     private void queryTypeDefinitions() throws IOException {
-        Request request = builderWithAuthHeader()
-                .url(serverUrl + "/webconsole/api/metadata/types")
-                .get()
-                .build();
+        HttpResponse<String> response = Unirest.get(serverUrl + "/webconsole/api/metadata/types")
+                .asString();
 
-        try (Response response = httpClient.newCall(request).execute()) {
-            if (response.isSuccessful() && response.body() != null) {
-                String responseBody = response.body().string();
-                log.info("查询类型定义成功: {}", responseBody);
-            } else {
-                String errorBody = response.body() != null ? response.body().string() : "No response body";
-                log.error("查询类型定义失败，状态码: {}, 响应体: {}", response.code(), errorBody);
-                throw new RuntimeException("查询类型定义失败，状态码: " + response.code() + ", 响应体: " + errorBody);
-            }
+        if (response.isSuccess()) {
+            log.info("查询类型定义成功: {}", response.getBody());
+        } else {
+            log.error("查询类型定义失败，状态码: {}, 响应体: {}", response.getStatus(), response.getBody());
+            throw new RuntimeException("查询类型定义失败，状态码: " + response.getStatus() + ", 响应体: " + response.getBody());
         }
     }
 }

@@ -1,15 +1,15 @@
 package io.emop.example.filestorage.usecase;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.emop.model.document.File;
 import io.emop.model.query.Q;
 import io.emop.service.S;
 import io.emop.service.api.storage.MinioProxyService;
 import io.emop.service.api.storage.StorageService;
 import io.emop.service.config.EMOPConfig;
+import kong.unirest.JsonNode;
+import kong.unirest.Unirest;
+import kong.unirest.HttpResponse;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -19,7 +19,6 @@ import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 附件文件管理演示
@@ -39,16 +38,11 @@ public class AttachmentFileDemo {
     private static final String MINIO_PROXY_BASE_URL = "http://minioproxy-" +
             EMOPConfig.getInstance().getString("EMOP_DOMAIN", "dev.emop.emopdata.com") + ":9003/minioproxy/api";
 
-    private final OkHttpClient httpClient;
-    private final ObjectMapper objectMapper;
-
     public AttachmentFileDemo() {
-        this.httpClient = new OkHttpClient.Builder()
-                .connectTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(60, TimeUnit.SECONDS)
-                .writeTimeout(60, TimeUnit.SECONDS)
-                .build();
-        this.objectMapper = new ObjectMapper();
+        // 配置 Unirest
+        Unirest.config()
+                .connectTimeout(30000)
+                .socketTimeout(60000);
     }
 
     /**
@@ -313,23 +307,14 @@ public class AttachmentFileDemo {
      * 获取支持的附件扩展名
      */
     private List<String> getSupportedAttachmentExtensions() throws IOException {
-        HttpUrl url = HttpUrl.parse(MINIO_PROXY_BASE_URL + "/file/supported-extensions");
+        HttpResponse<JsonNode> response = Unirest.get(MINIO_PROXY_BASE_URL + "/file/supported-extensions")
+                .asJson();
 
-        Request request = new Request.Builder()
-                .url(url)
-                .get()
-                .build();
-
-        try (Response response = httpClient.newCall(request).execute()) {
-            String responseBody = response.body().string();
-
-            if (!response.isSuccessful()) {
-                log.error("获取支持的附件扩展名失败 - HTTP {}: {}", response.code(), responseBody);
-                throw new IOException("HTTP " + response.code() + ": " + responseBody);
-            }
-
-            JsonNode jsonNode = objectMapper.readTree(responseBody);
-            return objectMapper.convertValue(jsonNode, List.class);
+        if (response.isSuccess()) {
+            return response.getBody().getArray().toList();
+        } else {
+            log.error("获取支持的附件扩展名失败 - HTTP {}: {}", response.getStatus(), response.getBody());
+            throw new IOException("HTTP " + response.getStatus() + ": " + response.getBody());
         }
     }
 
@@ -337,23 +322,14 @@ public class AttachmentFileDemo {
      * 检查附件文件是否存在
      */
     private boolean checkAttachmentExists(Long fileId, String extension) throws IOException {
-        HttpUrl url = HttpUrl.parse(MINIO_PROXY_BASE_URL + "/file/" + fileId + "/attachment/" + extension + "/exists");
+        HttpResponse<JsonNode> response = Unirest.get(MINIO_PROXY_BASE_URL + "/file/" + fileId + "/attachment/" + extension + "/exists")
+                .asJson();
 
-        Request request = new Request.Builder()
-                .url(url)
-                .get()
-                .build();
-
-        try (Response response = httpClient.newCall(request).execute()) {
-            String responseBody = response.body().string();
-
-            if (!response.isSuccessful()) {
-                log.warn("检查附件存在性失败 - HTTP {}: {}", response.code(), responseBody);
-                return false;
-            }
-
-            JsonNode jsonNode = objectMapper.readTree(responseBody);
-            return jsonNode.get("exists").asBoolean();
+        if (response.isSuccess()) {
+            return response.getBody().getObject().getBoolean("exists");
+        } else {
+            log.warn("检查附件存在性失败 - HTTP {}: {}", response.getStatus(), response.getBody());
+            return false;
         }
     }
 
@@ -361,26 +337,15 @@ public class AttachmentFileDemo {
      * 获取附件访问票据
      */
     private String getAttachmentAccessTicket(Long fileId, String extension, int expiryMinutes) throws IOException {
-        HttpUrl url = HttpUrl.parse(MINIO_PROXY_BASE_URL + "/file/" + fileId + "/attachment/" + extension + "/access-ticket")
-                .newBuilder()
-                .addQueryParameter("expiryMinutes", String.valueOf(expiryMinutes))
-                .build();
+        HttpResponse<JsonNode> response = Unirest.get(MINIO_PROXY_BASE_URL + "/file/" + fileId + "/attachment/" + extension + "/access-ticket")
+                .queryString("expiryMinutes", expiryMinutes)
+                .asJson();
 
-        Request request = new Request.Builder()
-                .url(url)
-                .get()
-                .build();
-
-        try (Response response = httpClient.newCall(request).execute()) {
-            String responseBody = response.body().string();
-
-            if (!response.isSuccessful()) {
-                log.error("获取附件访问票据失败 - HTTP {}: {}", response.code(), responseBody);
-                throw new IOException("HTTP " + response.code() + ": " + responseBody);
-            }
-
-            JsonNode jsonNode = objectMapper.readTree(responseBody);
-            return jsonNode.get("url").asText();
+        if (response.isSuccess()) {
+            return response.getBody().getObject().getString("url");
+        } else {
+            log.error("获取附件访问票据失败 - HTTP {}: {}", response.getStatus(), response.getBody());
+            throw new IOException("HTTP " + response.getStatus() + ": " + response.getBody());
         }
     }
 
@@ -388,23 +353,14 @@ public class AttachmentFileDemo {
      * 列出文件的所有附件
      */
     private List<String> listFileAttachments(Long fileId) throws IOException {
-        HttpUrl url = HttpUrl.parse(MINIO_PROXY_BASE_URL + "/file/" + fileId + "/attachments");
+        HttpResponse<JsonNode> response = Unirest.get(MINIO_PROXY_BASE_URL + "/file/" + fileId + "/attachments")
+                .asJson();
 
-        Request request = new Request.Builder()
-                .url(url)
-                .get()
-                .build();
-
-        try (Response response = httpClient.newCall(request).execute()) {
-            String responseBody = response.body().string();
-
-            if (!response.isSuccessful()) {
-                log.error("列出文件附件失败 - HTTP {}: {}", response.code(), responseBody);
-                throw new IOException("HTTP " + response.code() + ": " + responseBody);
-            }
-
-            JsonNode jsonNode = objectMapper.readTree(responseBody);
-            return objectMapper.convertValue(jsonNode.get("availableExtensions"), List.class);
+        if (response.isSuccess()) {
+            return response.getBody().getObject().getJSONArray("availableExtensions").toList();
+        } else {
+            log.error("列出文件附件失败 - HTTP {}: {}", response.getStatus(), response.getBody());
+            throw new IOException("HTTP " + response.getStatus() + ": " + response.getBody());
         }
     }
 
