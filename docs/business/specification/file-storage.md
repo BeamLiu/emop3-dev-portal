@@ -303,7 +303,7 @@ Content-Type: application/json
 Body: [fileId1, fileId2, ...]
 ```
 
-## 6. 使用场景区分
+### 5.3. 使用场景区分
 
 | 操作类型 | 使用方式 | 原因 |
 |---------|----------|------|
@@ -319,9 +319,9 @@ Body: [fileId1, fileId2, ...]
 | 图片预览 | REST | 图片处理和缩放 |
 | 附加文件下载 | REST | 文件流传输 |
 
-## 7. 文件元数据配置
+## 6. 文件元数据配置
 
-### 7.1 批量上传文件元数据管理
+### 6.1 批量上传文件元数据管理
 
 `bulkUploadZip` 接口支持文件元数据配置，允许在上传时对文件记录进行批量创建或更新操作。
 
@@ -427,9 +427,9 @@ public ResponseEntity<ZipUploadResult> bulkCreateDocuments(
     - UPDATE_ONLY模式下，如果fileId不存在会抛出异常
     - 文件上传成功但元数据更新失败时，文件仍会保留在存储中
 
-## 8. 文件存储安全机制
+## 7. 文件存储安全机制
 
-### 8.1 路径安全设计
+### 7.1 路径安全设计
 
 :::warning 🔔提醒
 建议：文件存储路径包含随机字符，可选的包括：
@@ -454,20 +454,9 @@ String correctPath = String.format("documents/%s/project-report.pdf", UUID.rando
 String wrongPath = "documents/project-report.pdf";
 ```
 
-## 9. 最佳实践总结
+## 8. 附加文件最佳实践
 
-### 9.1 设计原则
-
-1. **单一职责**：业务服务专注业务逻辑，文件服务专注文件处理
-2. **松耦合**：通过文件ID建立松耦合的关联关系
-3. **安全性**：文件路径带上业务对象的id，例如`File`，由于id是全局唯一，能一定程度阻止非安全形式暴力尝试路径访问
-4. **性能优先**：利用预签名URL实现高性能的直接访问
-
----
-
-## 10. 附加文件最佳实践
-
-### 10.1 推荐的使用模式
+### 8.1 推荐的使用模式
 
 **服务端生成附加文件**（推荐）：
 ```java
@@ -493,14 +482,14 @@ paths.forEach((fileId, path) -> {
 });
 ```
 
-### 10.2 性能优化建议
+### 8.2 性能优化建议
 
 1. **使用 InputStream** - 避免将整个文件加载到内存
 2. **批量操作** - 使用批量接口减少 RPC 调用
 3. **异步处理** - 附加文件生成可以异步进行
 4. **按需生成** - 只在需要时生成附加文件
 
-### 10.3 常见场景
+### 8.3 常见场景
 
 | 场景 | 扩展名 | 说明 |
 |------|--------|------|
@@ -511,3 +500,215 @@ paths.forEach((fileId, path) -> {
 
 ---
 **优先使用RPC接口进行轻量级文件操作，使用REST API处理复杂的文件传输和元数据管理。附加文件上传使用 MinioProxyService + StorageService 组合，避免内存拷贝。业务应用专注于业务逻辑，将文件处理委托给专业的文件服务！**
+
+## 9. 多站点支持（异地架构）
+
+### 9.1 概述
+
+minio-proxy 支持多站点架构，允许在不同地理位置部署 MinIO 集群，客户端可以访问就近的站点以提升性能。
+
+**核心特性：**
+- 支持配置多个 MinIO 站点
+- 基于用户、客户端信息智能选择站点
+- Bucket 自动映射（逻辑名 -> 站点特定名）
+- 站点内负载均衡由 Kong 处理
+- 单站点零认知负担，默认有一个 default 的站点
+
+### 9.2 架构设计
+
+```
+                    ┌──────────────────┐
+                    │  CAD Client /    │
+                    │  Web Client      │
+                    └────────┬─────────┘
+                             │
+                             │ 1. 请求站点选择
+                             ▼
+                    ┌──────────────────┐
+                    │  minio-proxy     │
+                    │  (任意站点)       │
+                    │  站点选择 API    │
+                    └────────┬─────────┘
+                             │
+                             │ 2. 返回目标站点 URL + bucket
+                             ▼
+                    ┌──────────────────┐
+                    │  Client 使用     │
+                    │  返回的信息      │
+                    └────────┬─────────┘
+                             │
+                             │ 3. 直接访问目标站点
+                             ▼
+        ┌────────────────────┼────────────────────┐
+        │                    │                    │
+        ▼                    ▼                    ▼
+   ┌─────────┐         ┌─────────┐         ┌─────────┐
+   │ Kong LB │         │ Kong LB │         │ Kong LB │
+   │ (中心)  │         │ (异地1) │         │ (异地2) │
+   └────┬────┘         └────┬────┘         └────┬────┘
+        │                   │                   │
+        ▼                   ▼                   ▼
+   ┌─────────┐         ┌─────────┐         ┌─────────┐
+   │ minio-  │         │ minio-  │         │ minio-  │
+   │ proxy   │         │ proxy   │         │ proxy   │
+   │ cluster │         │ cluster │         │ cluster │
+   └────┬────┘         └────┬────┘         └────┬────┘
+        │                   │                   │
+        ▼                   ▼                   ▼
+   ┌─────────┐         ┌─────────┐         ┌─────────┐
+   │ MinIO   │         │ MinIO   │         │ MinIO   │
+   │ Cluster │         │ Cluster │         │ Cluster │
+   └─────────┘         └─────────┘         └─────────┘
+```
+
+### 9.3 站点选择 API
+
+#### 选择站点
+
+```java
+// 1. 客户端调用站点选择 API
+POST /api/site-selection/select
+Content-Type: application/json
+
+{
+  "logicalBucket": "cad",
+  "userAttributes": {
+    "organizationId": "org-zjk-001"
+  }
+}
+
+// 2. 返回站点信息
+{
+  "siteId": "remote-zjk",
+  "siteName": "张家口站点",
+  "proxyUrl": "http://minioproxy-zjk.emop.emopdata.com/minioproxy",
+  "actualBucket": "cad-zjk1",
+  "reason": "Rule matched",
+  "matchedRule": "user-organization"
+}
+
+// 3. 客户端使用返回的信息组装 URL
+String uploadUrl = result.getProxyUrl() 
+    + "/api/file/direct-upload-ticket"
+    + "?bucket=" + result.getActualBucket()
+    + "&targetPath=models&filename=test.zip";
+```
+
+#### 其他 API
+
+```java
+// 获取站点数量（判断是否需要站点选择）
+GET /api/site-selection/site-count
+// 返回: 1 (单站点) 或 > 1 (多站点)
+
+// 获取所有站点列表
+GET /api/site-selection/sites
+
+// 获取站点详情
+GET /api/site-selection/sites/{siteId}
+```
+
+### 9.4 配置说明
+
+#### 单站点配置
+
+```yaml
+# 单站点配置示例（默认配置）
+# 使用原有的单站点配置, endpoint 为 kong(gateway) 的服务地址，后面有多个minio节点
+minio:
+   endpoint: http://storage-${EMOP_DOMAIN}:9000
+   accessKey: minioadmin
+   secretKey: EmopIs2Fun!
+   defaultBucket: emop
+EMOP_DOMAIN: dev.emop.emopdata.com
+```
+
+#### 多站点配置
+
+```yaml
+# 多站点配置示例
+minio:
+   multi-site:
+      enabled: true
+      # 站点配置（YAML 数组格式）
+      sites:
+         - siteId: central
+           siteName: 集团中心站点
+           proxyUrl: http://minioproxy-${EMOP_DOMAIN}/minioproxy
+           isDefault: true
+           tags:
+              location: central
+              region: beijing
+           bucketMapping:
+              cad: cad
+              documents: documents
+              temp: temp
+
+         - siteId: remote-zjk
+           siteName: 张家口站点
+           proxyUrl: http://minioproxy-zjk-${EMOP_DOMAIN}/minioproxy
+           isDefault: false
+           tags:
+              location: remote
+              region: zhangjiakou
+              site: zjk
+           bucketMapping:
+              cad: cad-zjk1
+              documents: documents-zjk1
+              temp: temp-zjk1
+
+      # 站点选择规则（YAML 数组格式）
+      selection-rules:
+         - name: explicit-site
+           priority: 1
+           type: EXPLICIT_SITE
+           description: 显式指定站点优先
+
+         - name: user-organization
+           priority: 10
+           type: USER_ATTRIBUTE
+           description: 张家口组织用户使用本地站点
+           targetSiteId: remote-zjk
+           conditions:
+              attribute: organizationId
+              value: org-zjk-*
+
+         - name: client-ip-range
+           priority: 20
+           type: CLIENT_IP
+           description: 张家口IP段使用本地站点
+           targetSiteId: remote-zjk
+           conditions:
+              ipRange: 192.167.100.0/24
+
+         - name: default-rule
+           priority: 999
+           type: DEFAULT
+           description: 默认使用集团中心站点
+           targetSiteId: central
+   #当前 site 的minio配置，不同的 site 的 minio-proxy 应该配置不一样的
+   #endpoint 为当前site的 kong(gateway) 的服务地址，后面有多个minio节点
+   endpoint: http://storage-zjk-${EMOP_DOMAIN}:9000
+   accessKey: minioadmin
+   secretKey: EmopIs2Fun!
+   defaultBucket: emop
+EMOP_DOMAIN: dev.emop.emopdata.com
+```
+
+### 9.6 MinIO Bucket Replication 配置
+
+多站点架构下，MinIO 站点间通过 Bucket Replication 进行数据同步：
+
+```bash
+# 配置 bucket 级别的同步
+mc replicate add central/cad-zjk1 --remote-bucket cad-zjk1 --priority 1
+mc replicate add central/documents-zjk1 --remote-bucket documents-zjk1 --priority 1
+```
+
+---
+
+**多站点架构使用建议：**
+1. 单站点场景：无需任何改动，直接使用原有方式
+2. 多站点场景：客户端启动时检查站点数量，动态决定是否调用站点选择 API
+4. Bucket 映射：使用逻辑 bucket 名称，由 minio-proxy 自动映射到站点特定的 bucket
+5. 数据同步：配置 MinIO Site Replication 或 Bucket Replication 确保数据一致性
