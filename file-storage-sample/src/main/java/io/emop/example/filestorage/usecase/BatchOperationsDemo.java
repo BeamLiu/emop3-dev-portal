@@ -24,6 +24,7 @@ import java.util.Map;
 @Slf4j
 public class BatchOperationsDemo {
 
+    // 这里选择不经过网关，避免登录，正式代码需要把端口去掉以经过网关验证用户登录有效性
     private static final String MINIO_PROXY_BASE_URL = "http://minioproxy-" +
             EMOPConfig.getInstance().getString("EMOP_DOMAIN", "dev.emop.emopdata.com") + ":9003/minioproxy/api";
 

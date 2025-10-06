@@ -27,6 +27,11 @@
 - 附加文件存在性检查和访问票据
 - 列出文件的所有附加文件
 
+### 4. 异地卷支持 (RemoteSiteDemo)
+- 基于用户属性的站点选择
+- 显式指定站点
+- 使用选择的站点上传文件
+
 ## 快速开始
 
 ### 1. 确认环境
@@ -59,6 +64,7 @@ mvn exec:java
 mvn exec:java -Dexec.args="basic"      # 基础上传下载
 mvn exec:java -Dexec.args="batch"      # 批量操作
 mvn exec:java -Dexec.args="attachment" # 附件管理
+mvn exec:java -Dexec.args="multiSite"     # 异地卷支持
 ```
 
 ## 项目结构
@@ -70,7 +76,9 @@ file-storage-sample/
 │   └── usecase/
 │       ├── BasicUploadDownloadDemo.java     # 场景1：基础上传下载
 │       ├── BatchOperationsDemo.java         # 场景2：批量操作
-│       └── AttachmentFileDemo.java          # 场景3：附件管理
+│       ├── AttachmentFileDemo.java          # 场景3：附件管理
+│       └── MultiSiteDemo.java              # 场景4：异地卷支持
+└── README.md
 ```
 
 ## 核心API
@@ -108,3 +116,28 @@ GET  /file/{fileId}/attachments                        列出所有附件
 
 ### 附加文件
 附加文件（如缩略图.jpg、校验文件.md5）与主文件关联，通过扩展名区分。
+
+### 异地卷支持
+多站点架构下，客户端通过站点选择API获取最优的minio-proxy URL和bucket映射，实现就近访问。
+
+**核心要点**：
+- 无论单站点还是多站点，代码逻辑一致，只是配置不同
+- 使用逻辑bucket名称（如"cad"），minio-proxy自动映射到实际bucket（如"cad-zjk1"）
+- 可选：在应用层缓存站点选择结果以提升性能
+
+**使用示例**：
+```java
+// 1. 调用站点选择API
+POST /api/site-selection/select
+Body: {
+  "logicalBucket": "cad",
+  "userAttributes": {
+    "organizationId": "org-zjk-001"
+  }
+}
+
+// 2. 使用返回的proxyUrl和actualBucket进行文件操作
+String uploadTicketUrl = result.getProxyUrl() + "/file/direct-upload-ticket"
+    + "?bucket=" + result.getActualBucket()
+    + "&targetPath=models&filename=test.zip";
+```

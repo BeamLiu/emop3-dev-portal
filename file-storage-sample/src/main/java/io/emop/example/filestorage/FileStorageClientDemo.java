@@ -3,6 +3,7 @@ package io.emop.example.filestorage;
 import io.emop.example.filestorage.usecase.AttachmentFileDemo;
 import io.emop.example.filestorage.usecase.BasicUploadDownloadDemo;
 import io.emop.example.filestorage.usecase.BatchOperationsDemo;
+import io.emop.example.filestorage.usecase.MultiSiteDemo;
 import io.emop.service.registry.ServiceRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +15,7 @@ import org.slf4j.LoggerFactory;
  * 1. 基础上传下载 - 基本的文件上传和下载操作
  * 2. 批量操作 - 批量文件处理和ZIP操作
  * 3. 附件文件管理 - 缩略图、校验文件等附件操作
- * 4. 文件元数据管理 - 使用DSL进行文件元数据操作
+ * 4. 异地卷支持 - 多站点架构下的站点选择和文件操作
  * <p>
  * 每个场景都在独立的演示类中实现，提供清晰的示例代码和详细的日志输出。
  */
@@ -25,11 +26,13 @@ public class FileStorageClientDemo {
     private final BasicUploadDownloadDemo basicDemo;
     private final BatchOperationsDemo batchDemo;
     private final AttachmentFileDemo attachmentDemo;
+    private final MultiSiteDemo multiSiteDemo;
 
     public FileStorageClientDemo() {
         this.basicDemo = new BasicUploadDownloadDemo();
         this.batchDemo = new BatchOperationsDemo();
         this.attachmentDemo = new AttachmentFileDemo();
+        this.multiSiteDemo = new MultiSiteDemo();
     }
 
     public static void main(String[] args) {
@@ -69,6 +72,12 @@ public class FileStorageClientDemo {
             logger.info("=".repeat(60));
             demo.attachmentDemo.runDemo();
 
+            // 场景4：异地卷支持演示
+            logger.info("\n" + "=".repeat(60));
+            logger.info("场景4：异地卷支持（多站点架构）");
+            logger.info("=".repeat(60));
+            demo.multiSiteDemo.runDemo();
+
             logger.info("\n" + "=".repeat(60));
             logger.info("所有演示场景执行完成！");
             logger.info("=".repeat(60));
@@ -106,8 +115,13 @@ public class FileStorageClientDemo {
                 logger.info("=== 运行附件文件演示 ===");
                 attachmentDemo.runDemo();
                 break;
+            case "multiSite":
+            case "4":
+                logger.info("=== 运行异地卷支持演示 ===");
+                multiSiteDemo.runDemo();
+                break;
             default:
-                logger.error("未知的演示场景: {}. 支持的场景: basic, batch, attachment, metadata", scenarioName);
+                logger.error("未知的演示场景: {}. 支持的场景: basic, batch, attachment, multiSite", scenarioName);
                 break;
         }
     }
