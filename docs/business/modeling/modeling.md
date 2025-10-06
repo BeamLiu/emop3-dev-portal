@@ -311,6 +311,155 @@ create type sample.Address extends GenericModelObject {
 ```
 
 
+## 视图定义（实现中）
+
+View（视图）是 EMOP 中的只读视图类型，用于提供基于 SQL 查询的数据视图能力。与与普通的 ModelObject 不同，View 不需要定义 `tableName`，而是通过 SQL 查询动态生成数据。
+
+### 视图特点
+
+1. **只读特性**
+   - View 类型的对象只能查询，不能进行创建、修改、删除操作
+   - 数据来源于底层的 SQL 查询结果
+
+2. **自动权限应用**
+   - 自动应用 EMOP 中定义的原表当中的 RLS（Row Level Security）权限规则
+   - 用户只能看到有权限访问的数据行
+
+3. **字段自动映射**
+   - SQL 查询结果自动映射到 View 的属性定义
+   - 支持复杂的 SQL 查询，包括多表关联、聚合计算等
+
+4. **API 一致性**
+   - View 的查询 API 与 ModelObject 完全一致
+   - 可以使用相同的查询语法和过滤条件
+   - 支持分页、排序等标准查询功能
+
+### Java 注解方式定义视图
+
+```java
+@PersistentEntity(schema = Schema.SAMPLE, name = "MyTaskView")
+@LocalizedNameDesc(name = "我的任务视图", description = "当前用户有权限的任务列表")
+@ViewDefinition(sql = """
+    SELECT t.id, t.name, t.status, t.assignee, t.create_time
+    FROM SAMPLE.TASK t
+    WHERE t.assignee = :currentUserId
+    """)
+public final class MyTaskView extends AbstractModelObject {
+    
+    @QuerySqlField
+    @LocalizedNameDesc(name = "任务名称")
+    private String name;
+    
+    @QuerySqlField
+    @LocalizedNameDesc(name = "状态")
+    private String status;
+    
+    @QuerySqlField
+    @LocalizedNameDesc(name = "负责人")
+    private Long assignee;
+    
+    @QuerySqlField
+    @LocalizedNameDesc(name = "创建时间")
+    private Date createTime;
+    
+    public MyTaskView() {
+        super(MyTaskView.class.getName());
+    }
+}
+```
+
+### DSL 方式定义视图
+
+```javascript
+create view sample.ProjectStatView extends AbstractModelObject {
+    attribute projectCode: String {
+        persistent: true
+    }
+    attribute projectName: String {
+        persistent: true
+    }
+    attribute totalTasks: Integer {
+        persistent: true
+    }
+    attribute completedTasks: Integer {
+        persistent: true
+    }
+    attribute progress: Double {
+        persistent: true
+    }
+    
+    schema: SAMPLE
+    sql: """
+        SELECT 
+            p.code as projectCode,
+            p.name as projectName,
+            COUNT(t.id) as totalTasks,
+            COUNT(CASE WHEN t.status = 'COMPLETED' THEN 1 END) as completedTasks,
+            CAST(COUNT(CASE WHEN t.status = 'COMPLETED' THEN 1 END) AS DOUBLE) / 
+                NULLIF(COUNT(t.id), 0) * 100 as progress
+        FROM SAMPLE.PROJECT p
+        LEFT JOIN SAMPLE.TASK t ON t.project_id = p.id
+        GROUP BY p.code, p.name
+    """
+    
+    multilang {
+        name.zh_CN: "项目统计视图"
+        name.en_US: "Project Statistics View"
+        description.zh_CN: "项目任务完成情况统计"
+    }
+}
+```
+
+### 视图查询示例
+
+```java
+// 查询方式与普通 ModelObject 完全一致
+List<MyTaskView> myTasks = Q.result(MyTaskView.class)
+    .where("status = ?", "进行中")
+    .orderBy("createTime desc")
+    .query();
+
+// 带参数的视图查询
+Map<String, Object> params = Map.of("currentUserId", currentUser.getId());
+List<MyTaskView> tasks = Q.result(MyTaskView.class)
+    .withParams(params)
+    .query();
+
+// 分页查询
+Page<ProjectStatView> page = Q.result(ProjectStatView.class)
+    .where("progress < ?", 80.0)
+    .page(1, 20)
+    .query();
+```
+
+### 应用场景
+
+1. **权限过滤视图**
+   - 创建"我的任务"视图，自动过滤出当前用户有权限的任务
+   - 创建"部门文档"视图，只显示用户所在部门的文档
+
+2. **聚合统计视图**
+   - 创建"项目统计"视图，汇总项目的进度、成本等信息
+   - 创建"物料库存"视图，实时计算物料的可用库存
+
+3. **多表关联视图**
+   - 创建"BOM成本"视图，关联物料、供应商、价格等多表数据
+   - 创建"产品全景"视图，整合产品、图纸、BOM、工艺等信息
+
+4. **历史数据视图**
+   - 创建"变更历史"视图，展示对象的历史版本和变更记录
+   - 创建"审批记录"视图，追溯审批流程的完整历史
+
+### 注意事项
+
+::: warning ⚠️使用限制
+1. View 目前还在开发中，部分功能可能尚未完全实现
+2. View 不支持写操作（创建、修改、删除）
+3. View 不需要定义 `tableName`
+4. View 的 SQL 中可以使用 `:paramName` 形式的参数占位符
+5. View 的性能取决于底层 SQL 查询的复杂度，建议合理使用索引
+:::
+
 ## 关系定义
 
 ### 1. 结构关系定义
@@ -457,7 +606,7 @@ public class BomLine extends AbstractModelObject {
 }
 ```
 
-:::warning ⚠️最佳实践
+::: info ℹ️最佳实践
 - 关系的默认的Getter方法不会触发懒加载，防止在序列化的时候触发非必要数据的序列化
 - 对于关联的对象需要序列化时，请手工触发懒加载后会自动缓存至属性值并在序列化的时候顺利下发
 - 以属性名作为方法名的方法，默认触发懒加载，例如
@@ -473,7 +622,7 @@ public List<Course> getCourses(){
 
 //触发懒加载, 同时自动赋值至courses
 public List<Course> courses(){
-    return get("courses", List.class);
+    return get("courses");
 }
 ```
 :::
