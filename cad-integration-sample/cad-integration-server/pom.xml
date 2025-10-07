@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.emop.example</groupId>
+        <artifactId>cad-integration-sample</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>cad-integration-server</artifactId>
+    <packaging>jar</packaging>
+    <name>cad-integration-server</name>
+    <description>CAD Integration Customization Server Sample</description>
+
+    <properties>
+        <emop.version>0.0.1-SNAPSHOT</emop.version>
+    </properties>
+
+    <dependencies>
+        <!-- CAD Integration Core -->
+        <dependency>
+            <groupId>io.emop</groupId>
+            <artifactId>cad-integration3</artifactId>
+            <version>${emop.version}</version>
+        </dependency>
+
+        <!-- EMOP Platform Dependencies -->
+        <dependency>
+            <groupId>io.emop</groupId>
+            <artifactId>platform-spring</artifactId>
+            <version>${emop.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- Lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>io.emop.example.cad.CustomCadIntegrationStarter</mainClass>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>build-info</id>
+                        <goals>
+                            <goal>build-info</goal>
+                        </goals>
+                        <configuration>
+                            <additionalProperties>
+                                <!-- add underscore prefix to avoid error in Eclipse -->
+                                <git.commit.time>_${git.commit.time}</git.commit.time>
+                                <git.commit.id.abbrev>_${git.commit.id.abbrev}</git.commit.id.abbrev>
+                            </additionalProperties>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

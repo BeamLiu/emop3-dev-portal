@@ -1,0 +1,2236 @@
+[
+    {
+        "root": true,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000001"
+        },
+        "modelFile": {
+            "name": "asm0016_asm_1.asm.85",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "b77cb6428f425c2f934a7ab3946fe670"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [
+            {
+                "filename": "prt0054_1.prt.53",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "5"
+            },
+            {
+                "filename": "prt0054_1.prt.53",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "6"
+            },
+            {
+                "filename": "prt0054_1.prt.53",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "7"
+            },
+            {
+                "filename": "prt0054_1.prt.53",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "8"
+            },
+            {
+                "filename": "prt0055_1.prt.21",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "9"
+            },
+            {
+                "filename": "prt0055_1.prt.21",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "10"
+            },
+            {
+                "filename": "prt0056_1.prt.18",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "11"
+            },
+            {
+                "filename": "prt0056_1.prt.18",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "12"
+            },
+            {
+                "filename": "prt0056_1.prt.18",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "13"
+            },
+            {
+                "filename": "prt0056_1.prt.18",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "14"
+            },
+            {
+                "filename": "prt0055_1.prt.21",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "15"
+            },
+            {
+                "filename": "prt0055_1.prt.21",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "16"
+            },
+            {
+                "filename": "prt0059_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "17"
+            },
+            {
+                "filename": "prt0060_1.prt.20",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "18"
+            },
+            {
+                "filename": "prt0060_1.prt.20",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "19"
+            },
+            {
+                "filename": "prt0060_1.prt.20",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "20"
+            },
+            {
+                "filename": "prt0073_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "21"
+            },
+            {
+                "filename": "prt0055_1.prt.21",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "22"
+            },
+            {
+                "filename": "prt0055_1.prt.21",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "23"
+            },
+            {
+                "filename": "prt0082_1.prt.18",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "24"
+            },
+            {
+                "filename": "prt0082_1.prt.18",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "25"
+            },
+            {
+                "filename": "prt0086_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "26"
+            },
+            {
+                "filename": "prt0087_1.prt.18",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "27"
+            },
+            {
+                "filename": "prt0087_1.prt.18",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "28"
+            },
+            {
+                "filename": "prt0088_1.prt.18",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "29"
+            },
+            {
+                "filename": "prt0088_1.prt.18",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "30"
+            },
+            {
+                "filename": "prt0089_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "31"
+            },
+            {
+                "filename": "prt0089_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "32"
+            },
+            {
+                "filename": "prt0090_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "33"
+            },
+            {
+                "filename": "prt0090_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "34"
+            },
+            {
+                "filename": "prt0087_1.prt.18",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "35"
+            },
+            {
+                "filename": "prt0094_1.prt.18",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "36"
+            },
+            {
+                "filename": "prt0094_1.prt.18",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "37"
+            },
+            {
+                "filename": "prt0060_1.prt.20",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "38"
+            },
+            {
+                "filename": "prt0100_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "39"
+            },
+            {
+                "filename": "prt0101_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "40"
+            },
+            {
+                "filename": "asm0028_asm_1.asm.20",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "41"
+            },
+            {
+                "filename": "asm0028_asm_1.asm.20",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "42"
+            },
+            {
+                "filename": "asm0028_asm_1.asm.20",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "43"
+            },
+            {
+                "filename": "asm0028_asm_1.asm.20",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "44"
+            },
+            {
+                "filename": "prt0087_1.prt.18",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "45"
+            },
+            {
+                "filename": "bracket975.prt.20",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "46"
+            },
+            {
+                "filename": "bracket975.prt.20",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "47"
+            },
+            {
+                "filename": "asm0029_asm_1.asm.20",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "48"
+            },
+            {
+                "filename": "prt0109_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "49"
+            },
+            {
+                "filename": "prt0109_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "50"
+            },
+            {
+                "filename": "prt0109_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "51"
+            },
+            {
+                "filename": "prt0109_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "52"
+            },
+            {
+                "filename": "prt0110_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "53"
+            },
+            {
+                "filename": "prt0110_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "54"
+            },
+            {
+                "filename": "asm0029_asm_1.asm.20",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "55"
+            },
+            {
+                "filename": "prt0111_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "56"
+            },
+            {
+                "filename": "prt0111_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "57"
+            },
+            {
+                "filename": "prt0112_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "58"
+            },
+            {
+                "filename": "prt0113_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "59"
+            },
+            {
+                "filename": "prt0114_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "60"
+            },
+            {
+                "filename": "prt0114_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "61"
+            },
+            {
+                "filename": "prt0114_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "62"
+            },
+            {
+                "filename": "prt0114_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "63"
+            },
+            {
+                "filename": "prt0115_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "64"
+            },
+            {
+                "filename": "prt0115_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "65"
+            },
+            {
+                "filename": "prt0115_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "66"
+            },
+            {
+                "filename": "prt0115_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "67"
+            },
+            {
+                "filename": "asm0030_asm_1.asm.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "68"
+            },
+            {
+                "filename": "prt0122_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "69"
+            },
+            {
+                "filename": "prt0122_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "70"
+            },
+            {
+                "filename": "shhps6-2_asm_1.asm.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "71"
+            },
+            {
+                "filename": "shhps6-2_asm_1.asm.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "72"
+            },
+            {
+                "filename": "shhps6-2_asm_1.asm.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "73"
+            },
+            {
+                "filename": "shhps6-2_asm_1.asm.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "74"
+            },
+            {
+                "filename": "shhps6-2_asm_1.asm.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "75"
+            },
+            {
+                "filename": "shhps6-2_asm_1.asm.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "76"
+            },
+            {
+                "filename": "shhps6-2_asm_1.asm.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "77"
+            },
+            {
+                "filename": "shhps6-2_asm_1.asm.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "78"
+            },
+            {
+                "filename": "shhps6-2_asm_1.asm.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "79"
+            },
+            {
+                "filename": "shhps6-2_asm_1.asm.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "80"
+            },
+            {
+                "filename": "shhps6-2_asm_1.asm.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "81"
+            },
+            {
+                "filename": "shhps6-2_asm_1.asm.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "82"
+            },
+            {
+                "filename": "shhps6-2_asm_1.asm.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "83"
+            },
+            {
+                "filename": "shhps6-2_asm_1.asm.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "84"
+            },
+            {
+                "filename": "shhps6-2_asm_1.asm.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "85"
+            },
+            {
+                "filename": "shhps6-2_asm_1.asm.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "86"
+            },
+            {
+                "filename": "prt0123_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "87"
+            },
+            {
+                "filename": "prt0123_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "88"
+            },
+            {
+                "filename": "prt0123_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "89"
+            },
+            {
+                "filename": "prt0123_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "90"
+            },
+            {
+                "filename": "prt0124_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "91"
+            },
+            {
+                "filename": "prt0124_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "92"
+            },
+            {
+                "filename": "prt0055_1.prt.21",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "93"
+            },
+            {
+                "filename": "prt0055_1.prt.21",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "94"
+            },
+            {
+                "filename": "asm0031_asm_1.asm.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "95"
+            },
+            {
+                "filename": "prt0124_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "96"
+            },
+            {
+                "filename": "prt0124_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "97"
+            },
+            {
+                "filename": "prt0259_1.prt.21",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "98"
+            },
+            {
+                "filename": "asm0033_asm_1.asm.24",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "99"
+            },
+            {
+                "filename": "asm0035_asm_1.asm.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "100"
+            },
+            {
+                "filename": "prt0275_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "101"
+            }
+        ],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "asm0016_asm_1.asm.85",
+        "itemCode": "CAD-2507-000001"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000002"
+        },
+        "modelFile": {
+            "name": "prt0054_1.prt.53",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "ac7084a49b78bfc139f5a9e00ff022fd"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0054_1.prt.53",
+        "itemCode": "CAD-2507-000002"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000003"
+        },
+        "modelFile": {
+            "name": "prt0055_1.prt.21",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "4e15fc640790fb7c652352818a1e78eb"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0055_1.prt.21",
+        "itemCode": "CAD-2507-000003"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000004"
+        },
+        "modelFile": {
+            "name": "prt0056_1.prt.18",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "4a980f1eb03949b1e3feaf1aed4d3a95"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0056_1.prt.18",
+        "itemCode": "CAD-2507-000004"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000005"
+        },
+        "modelFile": {
+            "name": "prt0059_1.prt.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "e987d878b60314e3418544afea80ab5a"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0059_1.prt.19",
+        "itemCode": "CAD-2507-000005"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000006"
+        },
+        "modelFile": {
+            "name": "prt0060_1.prt.20",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "d3ae84a46b80ee8b321f196dc88aacf9"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0060_1.prt.20",
+        "itemCode": "CAD-2507-000006"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000007"
+        },
+        "modelFile": {
+            "name": "prt0073_1.prt.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "4ede21fb454f4d1cde77c9979e1441c5"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0073_1.prt.19",
+        "itemCode": "CAD-2507-000007"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000008"
+        },
+        "modelFile": {
+            "name": "prt0082_1.prt.18",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "4055328997d26faad8dac995e0c629c2"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0082_1.prt.18",
+        "itemCode": "CAD-2507-000008"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000009"
+        },
+        "modelFile": {
+            "name": "prt0086_1.prt.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "8c0277239316bfb4571eef638e96090b"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0086_1.prt.19",
+        "itemCode": "CAD-2507-000009"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000010"
+        },
+        "modelFile": {
+            "name": "prt0087_1.prt.18",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "ccbfb65b3f8efe882aff7645dd0ac9f8"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0087_1.prt.18",
+        "itemCode": "CAD-2507-000010"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000011"
+        },
+        "modelFile": {
+            "name": "prt0088_1.prt.18",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "10bf133d810d6a553e6467a9d37af46b"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0088_1.prt.18",
+        "itemCode": "CAD-2507-000011"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000012"
+        },
+        "modelFile": {
+            "name": "prt0089_1.prt.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "856e5e300daf24c3adf80ad7614bb483"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0089_1.prt.19",
+        "itemCode": "CAD-2507-000012"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000013"
+        },
+        "modelFile": {
+            "name": "prt0090_1.prt.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "0c63f3b8303546a52bd3fa10f2b7655f"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0090_1.prt.19",
+        "itemCode": "CAD-2507-000013"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000014"
+        },
+        "modelFile": {
+            "name": "prt0094_1.prt.18",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "d43196c8c52a7777c5c3b4616bd1b46b"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0094_1.prt.18",
+        "itemCode": "CAD-2507-000014"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000015"
+        },
+        "modelFile": {
+            "name": "prt0100_1.prt.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "a270199d61c4bd151900b2491c563545"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0100_1.prt.19",
+        "itemCode": "CAD-2507-000015"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000016"
+        },
+        "modelFile": {
+            "name": "prt0101_1.prt.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "a9189a5673555e214fddf9c1bb1a9805"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0101_1.prt.19",
+        "itemCode": "CAD-2507-000016"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000017"
+        },
+        "modelFile": {
+            "name": "asm0028_asm_1.asm.20",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "580ec22ae58c2e6449219a4f2ca9cd95"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [
+            {
+                "filename": "prt0102_1.prt.21",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "5"
+            },
+            {
+                "filename": "prt0103_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "6"
+            },
+            {
+                "filename": "prt0104_1.prt.18",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "7"
+            }
+        ],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "asm0028_asm_1.asm.20",
+        "itemCode": "CAD-2507-000017"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000018"
+        },
+        "modelFile": {
+            "name": "bracket975.prt.20",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "c203a2c35fc0997bd45868707a25addd"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "bracket975.prt.20",
+        "itemCode": "CAD-2507-000018"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000019"
+        },
+        "modelFile": {
+            "name": "asm0029_asm_1.asm.20",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "2f3b065b2b088fad36eb301b37aa30e4"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [
+            {
+                "filename": "prt0105_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "5"
+            },
+            {
+                "filename": "prt0106_1.prt.20",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "6"
+            },
+            {
+                "filename": "prt0107_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "7"
+            },
+            {
+                "filename": "prt0108_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "8"
+            }
+        ],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "asm0029_asm_1.asm.20",
+        "itemCode": "CAD-2507-000019"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000020"
+        },
+        "modelFile": {
+            "name": "prt0109_1.prt.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "32d2db9c019220a7303f35010b310514"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0109_1.prt.19",
+        "itemCode": "CAD-2507-000020"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000021"
+        },
+        "modelFile": {
+            "name": "prt0110_1.prt.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "48c370247196efc737a70e07b83ba971"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0110_1.prt.19",
+        "itemCode": "CAD-2507-000021"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000022"
+        },
+        "modelFile": {
+            "name": "prt0111_1.prt.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "87dbe9128d31c0a4f8e107590535638a"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0111_1.prt.19",
+        "itemCode": "CAD-2507-000022"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000023"
+        },
+        "modelFile": {
+            "name": "prt0112_1.prt.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "472cfbfdf89ecc9668ff6ae8f17a0bbc"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0112_1.prt.19",
+        "itemCode": "CAD-2507-000023"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000024"
+        },
+        "modelFile": {
+            "name": "prt0113_1.prt.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "961db1ea225ce63353dff3e9277c90dc"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0113_1.prt.19",
+        "itemCode": "CAD-2507-000024"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000025"
+        },
+        "modelFile": {
+            "name": "prt0114_1.prt.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "8f209ab634236e98e3563b0293e57b74"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0114_1.prt.19",
+        "itemCode": "CAD-2507-000025"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000026"
+        },
+        "modelFile": {
+            "name": "prt0115_1.prt.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "3798b34b3e52b5c10f188b5c75b51d3b"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0115_1.prt.19",
+        "itemCode": "CAD-2507-000026"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000027"
+        },
+        "modelFile": {
+            "name": "asm0030_asm_1.asm.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "fea216518eeab8c3a91d0c96cf3477f5"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [
+            {
+                "filename": "prt0116_1.prt.18",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "5"
+            },
+            {
+                "filename": "prt0117_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "6"
+            },
+            {
+                "filename": "prt0118_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "7"
+            },
+            {
+                "filename": "prt0119_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "8"
+            },
+            {
+                "filename": "prt0120_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "9"
+            },
+            {
+                "filename": "prt0121_1.prt.18",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "10"
+            }
+        ],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "asm0030_asm_1.asm.19",
+        "itemCode": "CAD-2507-000027"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000028"
+        },
+        "modelFile": {
+            "name": "prt0122_1.prt.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "d88463770ec4e4d568f099a3f68a39f1"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0122_1.prt.19",
+        "itemCode": "CAD-2507-000028"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000029"
+        },
+        "modelFile": {
+            "name": "shhps6-2_asm_1.asm.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "b0da86c6206ae622d771d62de75f828b"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [
+            {
+                "filename": "manifold_solid_brep_19577.prt.20",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "5"
+            },
+            {
+                "filename": "manifold_solid_brep_19578.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "6"
+            }
+        ],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "shhps6-2_asm_1.asm.19",
+        "itemCode": "CAD-2507-000029"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000030"
+        },
+        "modelFile": {
+            "name": "prt0123_1.prt.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "bb37c99f4cb0b9c40958e79d56adc72c"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0123_1.prt.19",
+        "itemCode": "CAD-2507-000030"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000031"
+        },
+        "modelFile": {
+            "name": "prt0124_1.prt.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "04ec614a6a4b17bc6b08ce0c6fa90398"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0124_1.prt.19",
+        "itemCode": "CAD-2507-000031"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000032"
+        },
+        "modelFile": {
+            "name": "asm0031_asm_1.asm.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "a48b04f8ae420777ac20652b64463199"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [
+            {
+                "filename": "prt0127_1.prt.18",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "5"
+            }
+        ],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "asm0031_asm_1.asm.19",
+        "itemCode": "CAD-2507-000032"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000033"
+        },
+        "modelFile": {
+            "name": "prt0259_1.prt.21",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "bfcf5602fefad1ebaa84b94dcb552da8"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0259_1.prt.21",
+        "itemCode": "CAD-2507-000033"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000034"
+        },
+        "modelFile": {
+            "name": "asm0033_asm_1.asm.24",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "e43e31206aff8fee8147323b302f6be3"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [
+            {
+                "filename": "prt0261_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "5"
+            },
+            {
+                "filename": "prt0262_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "6"
+            },
+            {
+                "filename": "prt0263_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "7"
+            },
+            {
+                "filename": "prt0264_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "8"
+            },
+            {
+                "filename": "prt0265_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "9"
+            },
+            {
+                "filename": "prt0266_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "10"
+            }
+        ],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "asm0033_asm_1.asm.24",
+        "itemCode": "CAD-2507-000034"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000035"
+        },
+        "modelFile": {
+            "name": "asm0035_asm_1.asm.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "92631d9956ccd497048142a23b539660"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [
+            {
+                "filename": "prt0273_1.prt.18",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "5"
+            },
+            {
+                "filename": "prt0274_1.prt.19",
+                "transform": null,
+                "ignore": false,
+                "aieOccId": "6"
+            }
+        ],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "asm0035_asm_1.asm.19",
+        "itemCode": "CAD-2507-000035"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000036"
+        },
+        "modelFile": {
+            "name": "prt0275_1.prt.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "99b3fe16cbf9f41dfd118825a46e1ca8"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0275_1.prt.19",
+        "itemCode": "CAD-2507-000036"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000037"
+        },
+        "modelFile": {
+            "name": "prt0102_1.prt.21",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "70d32d9d5a5083f4ab0c465ad65e0e64"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0102_1.prt.21",
+        "itemCode": "CAD-2507-000037"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000038"
+        },
+        "modelFile": {
+            "name": "prt0103_1.prt.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "8ffdc2a16b4594257af69a858fa2c880"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0103_1.prt.19",
+        "itemCode": "CAD-2507-000038"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000039"
+        },
+        "modelFile": {
+            "name": "prt0104_1.prt.18",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "68259cb8a6116c31d2ff587bf4fd6799"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0104_1.prt.18",
+        "itemCode": "CAD-2507-000039"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000040"
+        },
+        "modelFile": {
+            "name": "prt0105_1.prt.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "4a23faa5fee05e787b70fcaa4df07354"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0105_1.prt.19",
+        "itemCode": "CAD-2507-000040"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000041"
+        },
+        "modelFile": {
+            "name": "prt0106_1.prt.20",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "3b00ad9c66abf3813e94494009a07634"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0106_1.prt.20",
+        "itemCode": "CAD-2507-000041"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000042"
+        },
+        "modelFile": {
+            "name": "prt0107_1.prt.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "d38c43de822e574025abccd7248ce231"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0107_1.prt.19",
+        "itemCode": "CAD-2507-000042"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000043"
+        },
+        "modelFile": {
+            "name": "prt0108_1.prt.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "e5a9046095c35af28c257a50c40803df"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0108_1.prt.19",
+        "itemCode": "CAD-2507-000043"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000044"
+        },
+        "modelFile": {
+            "name": "prt0116_1.prt.18",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "1c143327342d91aa194b279c56fb4a68"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0116_1.prt.18",
+        "itemCode": "CAD-2507-000044"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000045"
+        },
+        "modelFile": {
+            "name": "prt0117_1.prt.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "f010946e7b668d7cd8963d39bdcb4b89"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0117_1.prt.19",
+        "itemCode": "CAD-2507-000045"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000046"
+        },
+        "modelFile": {
+            "name": "prt0118_1.prt.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "c37452a6a5f7ef857add8d86b3b01a95"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0118_1.prt.19",
+        "itemCode": "CAD-2507-000046"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000047"
+        },
+        "modelFile": {
+            "name": "prt0119_1.prt.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "49e9f1d6d3046b8ae2db7c1b8f44b04e"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0119_1.prt.19",
+        "itemCode": "CAD-2507-000047"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000048"
+        },
+        "modelFile": {
+            "name": "prt0120_1.prt.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "797857d560e2d58305eadd3df18168ea"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0120_1.prt.19",
+        "itemCode": "CAD-2507-000048"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000049"
+        },
+        "modelFile": {
+            "name": "prt0121_1.prt.18",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "7dc58d202df1434c15a9fd34dfac4eec"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0121_1.prt.18",
+        "itemCode": "CAD-2507-000049"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000050"
+        },
+        "modelFile": {
+            "name": "manifold_solid_brep_19577.prt.20",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "bc4f46b8577e30329e6a48782cfa3125"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "manifold_solid_brep_19577.prt.20",
+        "itemCode": "CAD-2507-000050"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000051"
+        },
+        "modelFile": {
+            "name": "manifold_solid_brep_19578.prt.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "3fd0e19b24bd35881664a655d60db99a"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "manifold_solid_brep_19578.prt.19",
+        "itemCode": "CAD-2507-000051"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000052"
+        },
+        "modelFile": {
+            "name": "prt0127_1.prt.18",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "47147228afac9c7c2a3605a6b20e72e9"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0127_1.prt.18",
+        "itemCode": "CAD-2507-000052"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000053"
+        },
+        "modelFile": {
+            "name": "prt0261_1.prt.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "c76db3edb6cda4c2dbf6e5fab1ff968e"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0261_1.prt.19",
+        "itemCode": "CAD-2507-000053"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000054"
+        },
+        "modelFile": {
+            "name": "prt0262_1.prt.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "d346e3186bfb78680cdf96b22dc8e283"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0262_1.prt.19",
+        "itemCode": "CAD-2507-000054"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000055"
+        },
+        "modelFile": {
+            "name": "prt0263_1.prt.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "acf5699315a7bb3a1b42eff27363fd4a"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0263_1.prt.19",
+        "itemCode": "CAD-2507-000055"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000056"
+        },
+        "modelFile": {
+            "name": "prt0264_1.prt.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "648ec025da5eae20cff8bf5e479f260b"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0264_1.prt.19",
+        "itemCode": "CAD-2507-000056"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000057"
+        },
+        "modelFile": {
+            "name": "prt0265_1.prt.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "3bb6914d7180eaed69bc557a6dc64966"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0265_1.prt.19",
+        "itemCode": "CAD-2507-000057"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000058"
+        },
+        "modelFile": {
+            "name": "prt0266_1.prt.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "7f5e2ee03d69757ae9dc2766f2d150d4"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0266_1.prt.19",
+        "itemCode": "CAD-2507-000058"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000059"
+        },
+        "modelFile": {
+            "name": "prt0273_1.prt.18",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "3b9a1acf79532200ef5888e68654403a"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0273_1.prt.18",
+        "itemCode": "CAD-2507-000059"
+    },
+    {
+        "root": false,
+        "subType": "Generic",
+        "props": {
+            "图号": "CAD-2507-000060"
+        },
+        "modelFile": {
+            "name": "prt0274_1.prt.19",
+            "path": "D:\\temp\\3d\\",
+            "datasetId": null,
+            "revisionIid": null,
+            "checksum": "ee00e42024c2c1e36b247db7f486366f"
+        },
+        "drwFiles": [],
+        "pdfFiles": [],
+        "dwgFiles": [],
+        "children": [],
+        "familyInstances": [],
+        "released": false,
+        "readable": true,
+        "writable": true,
+        "useType": "REFERENCE",
+        "name": "prt0274_1.prt.19",
+        "itemCode": "CAD-2507-000060"
+    }
+]

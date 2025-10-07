@@ -1,0 +1,138 @@
+# ========================================
+# CAD集成自定义配置示例
+# 此文件用于定制化项目扩展配置
+# 可以创建多个 cadconfig-*.yml 文件
+# ========================================
+
+# 客户端UI配置示例
+keepAllCreateItems: false
+openCreateItemLink: false
+batchCreateMaterialUrl: /material/#/batch-add
+advancedMaterialSearchUrl: /material/#/search
+
+# 装配类型配置
+asmItemTypes:
+  - type: Design
+    name: 装配A
+    link: /material-management/#/cad/add/JM8_PartRevision
+    query: /material/#/search
+
+# 零件类型配置
+prtItemTypes:
+  - type: Design
+    name: 零件A
+    link: /material-management/#/cad/add/JM8_PartRevision
+    query: /material/#/search
+
+# 文件同步选项
+stopSaveWhenError: false
+savePathSearchable: false
+scanDrawingFiles: true
+showFileSyncOptions: true
+syncPdfFile: true
+syncDwgFile: true
+
+# 数据集配置
+dwgDatasetType: EM6_AUTOCAD
+dwgDatasetRefType: EM6_myautocad
+datasetRelationType: IMAN_specification
+removeUnmatchedDatasets: false
+
+# UI显示选项
+showSyncPropertiesOption: true
+showRebuildBomOption: true
+showDownloadReleasedVersionOption: true
+showOpenRefDrawingOption: true
+
+# 版本名称
+baseLinedName: 基线
+releasedName: 发布
+releasedNames:
+  - 发布
+
+# BOM配置
+ignoreFamilyMembers: false
+enablePreciseBOM: false
+reassemblyBom: false
+searchOracleDatesetBatchSize: 1000
+defaultTreeWhenBomLessThan: 300
+onlyTableWhenBomGreaterThan: 2000
+resetBomLineQuantity: true
+
+# 属性显示配置
+propsShowInGrid:
+  - 图号
+  - 名称
+  - 所有者
+  - 描述
+  - 数据集@datasetName
+
+propsShowInTable:
+  - 图号
+  - 名称
+  - 版本
+  - 类型
+  - 是否检出@checkedOut
+  - 发布状态@releasedStatus
+  - 所有者
+  - 描述
+  - 数据集@datasetName
+
+# 客户端路径配置
+converterDllDir: C:\Eingsoft\CadConverter
+clientImageSubDir: output\thumbnail
+clientStepSubDir: output\step
+clientJtSubDir: output\jt
+clientPDFSubDir: output\pdf
+clientDWGSubDir: output\dwg
+
+# Logo配置
+logo: null
+
+# CAD特定选项
+cadOptions:
+  ugnx:
+    categoryProps:
+      - category: 零组件版本
+        titles:
+          - 图号
+          - 物料标志
+  creo:
+    props:
+      - name: 子件过滤
+        type: Boolean
+        mappings:
+          - value: "true"
+            cadValue: "YES"
+          - value: "false"
+            cadValue: "NO"
+
+# 数据集引用类型映射
+fileEntityType2DatasetRefTypeMap:
+  default:
+    PRT: PrtFile
+    ASM: AsmFile
+    DRW: DrwFile
+    PDF: PDF_Reference
+    DWG: B8ZWCAD
+    JPEG: JPEG
+  CREO:
+    PRT: PrtFile
+    ASM: AsmFile
+    DRW: DrwFile
+    PDF: PDF_Reference
+    DWG: B8ZWCAD
+    JPEG: JPEG
+  CATIA:
+    PRT: PrtFile
+    ASM: AsmFile
+    DRW: DrwFile
+    PDF: PDF_Reference
+    DWG: B8ZWCAD
+    JPEG: JPEG
+    BMP: BMP
+  ALTIUM:
+    ZIP: ZIPFILE
+    PDF: PDF_Reference
+    DWG: H9_DWG
+    JPEG: JPEG
