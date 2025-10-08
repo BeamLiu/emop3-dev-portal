@@ -211,6 +211,26 @@ mvn clean install
 $ sudo docker login --username=eingsoft2017 registry.cn-shenzhen.aliyuncs.com
 ```
 ::: warning ⚠️注意
+docker版本要大于`27`, 如果操作系统自带版本太低建议卸载后从新安装
+
+`sudo apt install docker.io`
+```
+beam@beam-Latitude-7400:~$ docker -v
+Docker version 27.5.1, build 27.5.1-0ubuntu3~22.04.2
+beam@beam-Latitude-7400:~$ docker version
+Client:
+ Version:           27.5.1
+ API version:       1.47
+...
+Server:
+ Engine:
+  Version:          27.5.1
+  API version:      1.47 (minimum version 1.24)
+  Go version:       go1.22.2
+```
+  :::
+
+::: warning ⚠️注意
 - docker登录密码 `emop@2025`, 密码会不定期更新
 - 命令行`sudo`有可能需要先输入操作系统的`root`或`Administrator`密码, 不要与 docker 的登录密码混淆了
   :::
