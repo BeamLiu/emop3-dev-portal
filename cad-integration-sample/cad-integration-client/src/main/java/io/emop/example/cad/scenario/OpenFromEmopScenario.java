@@ -2,6 +2,9 @@ package io.emop.example.cad.scenario;
 
 import io.emop.example.cad.model.ItemEntity;
 import io.emop.example.cad.service.*;
+import io.emop.model.cad.CADComponent;
+import io.emop.model.query.Q;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -15,19 +18,20 @@ import java.util.List;
  * 演示从EMOP系统打开CAD模型的完整流程
  */
 @Slf4j
+@RequiredArgsConstructor
 public class OpenFromEmopScenario {
     
     private final CadApiService cadApiService = new CadApiService();
     private final FileStorageService fileStorageService = new FileStorageService();
     private final IdMappingService idMappingService = new IdMappingService();
     
+    private final String cadComponentCode;
+
     public void execute() {
         try {
             log.info("=== 开始从EMOP打开流程 ===");
             
-            // 注意：这里使用示例componentId，实际使用时需要使用真实的ID
-            // 可以从保存场景的返回结果中获取
-            Long componentId = 12345L;
+            Long componentId = Q.result(CADComponent.class).where("code=?",cadComponentCode).first().getId();
             
             log.info("\n步骤1: 获取BOM结构");
             log.info("ComponentId: {}", componentId);

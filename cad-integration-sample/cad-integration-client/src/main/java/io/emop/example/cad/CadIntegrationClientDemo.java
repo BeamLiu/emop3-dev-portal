@@ -23,17 +23,20 @@ public class CadIntegrationClientDemo {
                     runSaveScenario();
                     break;
                 case "open":
-                    runOpenScenario();
+                    runOpenScenario(args[1]); // 需要提供cadComponentCode参数
                     break;
                 case "all":
                 default:
-                    runSaveScenario();
+                    // 保存并获得根节点图号
+                    String rootComponentCode = runSaveScenario();
+                    // String rootComponentCode = "CAD-2510-003627"; // 使用固定图号以便多次运行
                     log.info("\n\n");
-                    runOpenScenario();
+                    runOpenScenario(rootComponentCode);
                     break;
             }
             
             log.info("\n=== 演示完成 ===");
+            System.exit(0);
         } catch (Exception e) {
             log.error("演示执行失败", e);
             System.exit(1);
@@ -43,18 +46,20 @@ public class CadIntegrationClientDemo {
     /**
      * 运行保存到EMOP场景
      */
-    private static void runSaveScenario() {
+    private static String runSaveScenario() {
         log.info("\n>>> 场景1：保存到EMOP <<<");
         SaveToEmopScenario scenario = new SaveToEmopScenario();
-        scenario.execute();
+        String rootCode = scenario.execute();
+        log.info("根节点图号: {}", rootCode);
+        return rootCode;
     }
     
     /**
      * 运行从EMOP打开场景
      */
-    private static void runOpenScenario() {
+    private static void runOpenScenario(String cadComponentCode) {
         log.info("\n>>> 场景2：从EMOP打开 <<<");
-        OpenFromEmopScenario scenario = new OpenFromEmopScenario();
+        OpenFromEmopScenario scenario = new OpenFromEmopScenario(cadComponentCode);
         scenario.execute();
     }
 }

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.emop.example.cad.model.ItemEntity;
 import io.emop.example.cad.model.PostItemEntityResponse;
 import io.emop.example.cad.service.*;
+import io.emop.example.cad.util.Utils;
 import io.emop.model.query.tuple.Tuple2;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,7 +28,7 @@ public class SaveToEmopScenario {
     private final IdMappingService idMappingService = new IdMappingService();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public void execute() {
+    public String execute() {
         try {
             log.info("=== 开始保存到EMOP流程 ===");
 
@@ -74,7 +75,7 @@ public class SaveToEmopScenario {
 
             // 步骤6: 批量上传ZIP文件（UPDATE_ONLY）
             log.info("\n步骤6: 批量上传ZIP文件更新File对象（UPDATE_ONLY）");
-            log.info("File Metadata Config: {}", fileMetadataConfig);
+            log.info("File Metadata Config: {}", Utils.previewString(fileMetadataConfig));
             fileStorageService.bulkUploadZip(
                     reorganizedZip,
                     "cad",
@@ -88,6 +89,12 @@ public class SaveToEmopScenario {
             originalZip.delete();
 
             log.info("\n=== 保存到EMOP流程完成 ===");
+
+            // 返回根Item的ItemCode
+            return postResponse.getItemEntities().stream()
+                    .filter(e -> e.getRoot() != null && e.getRoot())
+                    .map(e -> e.getItemCode())
+                    .findFirst().orElseThrow();
 
         } catch (Exception e) {
             log.error("保存到EMOP失败", e);

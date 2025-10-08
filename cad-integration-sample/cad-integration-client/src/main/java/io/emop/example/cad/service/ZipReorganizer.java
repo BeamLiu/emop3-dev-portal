@@ -63,7 +63,10 @@ public class ZipReorganizer {
 
                 ZipEntry newEntry = new ZipEntry(newPath);
                 zos.putNextEntry(newEntry);
-                newFileIdMapping.put(newPath, newFileId);
+                // 只有主模型才需要更新元数据，也就是说附加文件不需要
+                if (!filename.endsWith(".jpg")) {
+                    newFileIdMapping.put(newPath, newFileId);
+                }
                 log.debug("Added entry: {}", newPath);
 
                 int len;

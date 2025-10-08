@@ -5,12 +5,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.emop.example.cad.model.ItemEntity;
 import io.emop.example.cad.model.PostItemEntityResponse;
+import io.emop.example.cad.util.Utils;
 import io.emop.service.config.EMOPConfig;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * CAD API调用服务
@@ -23,11 +25,19 @@ public class CadApiService {
             ":891/cad-integration-sample/api/cad-integration";
     
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private static volatile boolean unirestConfigured = false;
     
     public CadApiService() {
-        Unirest.config()
-                .connectTimeout(30000)
-                .socketTimeout(60000);
+        if (!unirestConfigured) {
+            synchronized (CadApiService.class) {
+                if (!unirestConfigured) {
+                    Unirest.config()
+                            .connectTimeout(30000)
+                            .socketTimeout(60000);
+                    unirestConfigured = true;
+                }
+            }
+        }
     }
     
     /**
@@ -60,9 +70,9 @@ public class CadApiService {
         String url = CAD_BASE_URL + "/item";
         log.info("调用Post API: {}", url);
         
-        String requestBody = objectMapper.writeValueAsString(
-            new PostRequest(itemEntities)
-        );
+        String requestBody = objectMapper.writeValueAsString(Map.of("itemEntities", itemEntities));
+
+        log.info("BOM提交: {} ...", Utils.previewString(requestBody));
         
         HttpResponse<String> response = Unirest.post(url)
                 .header("Content-Type", "application/json")
@@ -75,10 +85,11 @@ public class CadApiService {
             throw new RuntimeException("Post失败: HTTP " + response.getStatus() + ": " + response.getBody());
         }
         
-        log.info("BOM提交成功");
+        String body = response.getBody();
+        log.info("BOM提交成功, 返回: {}", Utils.previewString(body));
         
         // 解析响应
-        JsonNode jsonNode = objectMapper.readTree(response.getBody());
+        JsonNode jsonNode = objectMapper.readTree(body);
         JsonNode dataNode = jsonNode.get("content");
         return objectMapper.convertValue(dataNode, PostItemEntityResponse.class);
     }
@@ -96,22 +107,13 @@ public class CadApiService {
                 .asString();
         
         if (response.isSuccess()) {
-            JsonNode jsonNode = objectMapper.readTree(response.getBody());
+            String body = response.getBody();
+            log.info("加载BOM成功, 返回: {}", Utils.previewString(body));
+            JsonNode jsonNode = objectMapper.readTree(body);
             JsonNode dataNode = jsonNode.get("content").get("itemEntities");
             return objectMapper.convertValue(dataNode, new TypeReference<List<ItemEntity>>() {});
         } else {
             throw new RuntimeException("Get失败: HTTP " + response.getStatus() + ": " + response.getBody());
-        }
-    }
-    
-    /**
-     * Post请求包装类
-     */
-    private static class PostRequest {
-        public List<ItemEntity> itemEntities;
-        
-        public PostRequest(List<ItemEntity> itemEntities) {
-            this.itemEntities = itemEntities;
         }
     }
 }

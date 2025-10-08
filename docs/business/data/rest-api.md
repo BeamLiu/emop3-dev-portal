@@ -110,7 +110,6 @@ API响应中的`_links`对象包含所有可用的操作链接：
 -   指定关系名称：GET `/webconsole/api/references/{id}?relationNames=reference,target`
 -   版本精确匹配：GET `/webconsole/api/references/{id}?revisionRule=PRECISE`
 
-详细使用说明请参考 [引用关系反向查询文档](./incoming-reference.md)
 
 ### 图搜索接口
 

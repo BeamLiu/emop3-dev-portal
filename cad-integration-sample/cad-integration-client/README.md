@@ -24,24 +24,17 @@ cad-integration-client/
 ├── src/main/java/io/emop/example/cad/
 │   ├── CadIntegrationClientDemo.java          # 主入口
 │   ├── model/                                  # 数据模型
-│   │   ├── ItemEntity.java                    # BOM实体
-│   │   ├── ModelFile.java                     # 模型文件信息
-│   │   ├── ChildReference.java                # 子组件引用
-│   │   └── SiteSelectionResult.java           # 站点选择结果
 │   ├── service/                                # 核心服务
-│   │   ├── CadApiService.java                 # CAD API调用服务
-│   │   ├── FileStorageService.java            # 文件存储服务
-│   │   ├── SiteSelectionService.java          # 站点选择服务
-│   │   ├── ZipReorganizer.java                # ZIP重组服务
-│   │   └── IdMappingService.java              # ID映射管理服务
-│   └── scenario/                               # 场景实现
-│       ├── SaveToEmopScenario.java            # 保存到EMOP场景
-│       └── OpenFromEmopScenario.java          # 从EMOP打开场景
-├── test-data/                                  # 测试数据（录制数据）
-│   ├── 1_compare_request.json                 # Compare请求数据
-│   ├── 2_post_to_bom.json                     # Post BOM数据
-│   ├── 3_1_creo-upload17453228522993597702.zip # CAD文件ZIP包
-│   └── 3_2_filemetadata.json                  # 文件元数据映射
+│   ├── scenario/                               # 场景实现
+│   │   ├── SaveToEmopScenario.java            # 保存到EMOP场景
+│   │   └── OpenFromEmopScenario.java          # 从EMOP打开场景
+│   └── util/                                   # 工具类
+├── src/main/resources/
+│   └── test-data/                              # 测试数据（录制数据）
+│       ├── 1_compare_request.json             # Compare请求数据
+│       ├── 2_post_to_bom.json                 # Post BOM数据
+│       ├── 3_1_creo-upload17453228522993597702.zip # CAD文件ZIP包
+│       └── 3_2_filemetadata.json              # 文件元数据映射
 ├── pom.xml
 └── README.md
 ```
@@ -53,11 +46,8 @@ cad-integration-client/
 确保以下服务可用，并设置本地hosts解析：
 
 ```bash
-# 注册中心
-192.168.10.103 registry-dev.emop.emopdata.com
-
-# CAD Integration服务
-192.168.10.103 dev.emop.emopdata.com
+# 注册中心(本地)
+172.0.0.1 registry-dev.emop.emopdata.com
 
 # MinIO Proxy服务
 192.168.10.103 minioproxy-dev.emop.emopdata.com
