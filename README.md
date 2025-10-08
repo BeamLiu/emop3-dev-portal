@@ -12,7 +12,7 @@
 | 2 | [hello-emop-server](./hello-emop-server/) | **入门示例** - 创建自定义模型和服务 | 学习ModelObject定义、Service开发、RPC/REST调用 | ⭐⭐ |
 | 3 | [relation-sample](./relation-sample/) | **关系操作** - 结构关系、关联关系、XPath、DSL | 掌握对象关系设计、XPath查询、DSL数据操作 | ⭐⭐⭐ |
 | 4 | [file-storage-sample](./file-storage-sample/) | **文件存储** - 上传下载、批量操作、附件管理 | 理解票据机制、批量操作、多站点架构 | ⭐⭐ |
-| 5 | [cad-integration-sample](./cad-integration-sample/) | **CAD集成** - 客户端调用、服务端扩展 | 学习CAD集成流程、扩展点机制、ZIP重组 | ⭐⭐⭐⭐ |
+| 5 | [cad-integration-sample](./cad-integration-sample/) | **CAD集成** - 客户端调用、服务端扩展 | 学习CAD集成流程、扩展点机制 | ⭐⭐⭐⭐ |
 | 6 | [integration-test](./integration-test/) | **集成测试** - 各种API使用样例和性能测试 | 参考实际API调用方式、性能优化技巧 | ⭐⭐⭐ |
 
 ## 📖 项目详解
