@@ -1,6 +1,7 @@
 package io.emop.integrationtest.usecase.common;
 
 import io.emop.model.common.ItemRevision;
+import io.emop.model.common.RevisionRule;
 import io.emop.model.common.UserContext;
 import io.emop.model.relation.ReferenceInfo;
 import io.emop.model.relation.ReferenceInfo.ReferenceType;
@@ -11,6 +12,8 @@ import io.emop.integrationtest.util.TimerUtils;
 import io.emop.service.S;
 import io.emop.service.api.domain.common.AssociateRelationService;
 import io.emop.service.api.domain.common.IncomingReferenceService;
+import io.emop.service.api.domain.common.ReferenceQueryContext.ReferenceCategory;
+import io.emop.service.api.domain.common.ReferenceQueryContext;
 import io.emop.service.api.data.ObjectService;
 import io.emop.service.api.relation.RelationType;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -64,6 +67,12 @@ public class IncomingReferenceTest {
         S.withStrongConsistency(this::testRevisionableRefIncomingImpl);
     }
 
+    @Test
+    @Order(4)
+    public void testPerformanceOptimization() {
+        S.withStrongConsistency(this::testPerformanceOptimizationImpl);
+    }
+
     /**
      * 测试关联关系的反向查找
      */
@@ -102,10 +111,18 @@ public class IncomingReferenceTest {
             assertEquals(ReferenceType.ASSOCIATE, refInfos3.get(0).getReferenceType());
 
             // 使用关系类型过滤
-            List<ReferenceInfo> refInfosFiltered = incomingReferenceService.findReferencers(secondary1, RelationType.reference);
+            ReferenceQueryContext contextFiltered = ReferenceQueryContext.builder()
+                    .categories(ReferenceCategory.ASSOCIATE)
+                    .relationNames(RelationType.reference.getName())
+                    .build();
+            List<ReferenceInfo> refInfosFiltered = incomingReferenceService.findReferencers(secondary1, contextFiltered);
             assertEquals(1, refInfosFiltered.size());
 
-            List<ReferenceInfo> refInfosFilteredEmpty = incomingReferenceService.findReferencers(secondary1, RelationType.target);
+            ReferenceQueryContext contextFilteredEmpty = ReferenceQueryContext.builder()
+                    .categories(ReferenceCategory.ASSOCIATE)
+                    .relationNames(RelationType.target.getName())
+                    .build();
+            List<ReferenceInfo> refInfosFilteredEmpty = incomingReferenceService.findReferencers(secondary1, contextFilteredEmpty);
             assertEquals(0, refInfosFilteredEmpty.size());
 
             // 测试删除关系后的反向引用情况
@@ -254,24 +271,88 @@ public class IncomingReferenceTest {
             ref1 = S.service(ObjectService.class).save(ref1);
 
             // 查找特定版本的引用（精确匹配）
-            List<ReferenceInfo> materialARefsAfterUpdate = incomingReferenceService.findReferencers(material, true);
+            ReferenceQueryContext preciseContext = ReferenceQueryContext.builder()
+                    .categories(ReferenceCategory.REVISIONABLE)
+                    .revisionRule(RevisionRule.PRECISE)
+                    .sourceTypes("SampleMaterialReference")  // 指定引用者类型以提升性能
+                    .build();
+            List<ReferenceInfo> materialARefsAfterUpdate = incomingReferenceService.findReferencers(material, preciseContext);
             assertEquals(1, materialARefsAfterUpdate.size());
             assertEquals(ref2.getId(), materialARefsAfterUpdate.get(0).getReferencer().getId());
+            
             // 精确查找版本B的引用
-            List<ReferenceInfo> materialBRefs = incomingReferenceService.findReferencers(materialB, true);
+            List<ReferenceInfo> materialBRefs = incomingReferenceService.findReferencers(materialB, preciseContext);
             assertEquals(1, materialBRefs.size());
             assertEquals(ref1.getId(), materialBRefs.get(0).getReferencer().getId());
 
             // 查找所有版本的引用（非精确匹配）
-            List<ReferenceInfo> allMaterialRefs = incomingReferenceService.findReferencers(material, false);
+            ReferenceQueryContext latestContext = ReferenceQueryContext.builder()
+                    .categories(ReferenceCategory.REVISIONABLE)
+                    .revisionRule(RevisionRule.LATEST)
+                    .sourceTypes("SampleMaterialReference")  // 指定引用者类型以提升性能
+                    .build();
+            List<ReferenceInfo> allMaterialRefs = incomingReferenceService.findReferencers(material, latestContext);
             // 这里应该有两个引用
             assertEquals(2, allMaterialRefs.size());
-            allMaterialRefs = incomingReferenceService.findReferencers(materialB, false);
+            allMaterialRefs = incomingReferenceService.findReferencers(materialB, latestContext);
             // 这里应该有两个引用
             assertEquals(2, allMaterialRefs.size());
 
 
             log.info("可版本化引用反向查询测试成功完成");
+        });
+    }
+
+    /**
+     * 测试性能优化场景
+     */
+    private void testPerformanceOptimizationImpl() {
+        TimerUtils.measureExecutionTime("测试性能优化场景", () -> {
+            // 准备测试数据
+            SampleTask task = new SampleTask();
+            task.setName("Performance Test Task");
+            task.setCode("TASK-PERF-" + System.currentTimeMillis());
+            task.setRevId("A");
+            task = S.service(ObjectService.class).upsertByBusinessKey(task);
+
+            SampleTask subTask = new SampleTask();
+            subTask.setName("Sub Task");
+            subTask.setCode("TASK-SUB-PERF-" + System.currentTimeMillis());
+            subTask.setRevId("A");
+            subTask = S.service(ObjectService.class).upsertByBusinessKey(subTask);
+
+            task.setSubTaskId(subTask.getId());
+            task = S.service(ObjectService.class).upsertByBusinessKey(task);
+
+            IncomingReferenceService service = S.service(IncomingReferenceService.class);
+
+            // 场景1：只查找结构关系，指定引用者类型（最优性能）
+            ReferenceQueryContext optimalContext = ReferenceQueryContext.builder()
+                    .categories(ReferenceCategory.STRUCTURAL)
+                    .sourceTypes("SampleTask")
+                    .relationNames("subTask")
+                    .build();
+            List<ReferenceInfo> refs1 = service.findReferencers(subTask, optimalContext);
+            assertEquals(1, refs1.size());
+            assertEquals(task.getId(), refs1.get(0).getReferencer().getId());
+
+            // 场景2：只查找结构关系，不指定引用者类型（性能较差）
+            ReferenceQueryContext subOptimalContext = ReferenceQueryContext.builder()
+                    .categories(ReferenceCategory.STRUCTURAL)
+                    .build();
+            List<ReferenceInfo> refs2 = service.findReferencers(subTask, subOptimalContext);
+            assertEquals(1, refs2.size());
+
+            // 场景3：查找所有引用（性能最差）
+            List<ReferenceInfo> refs3 = service.findReferencers(subTask);
+            assertEquals(1, refs3.size());
+
+            // 场景4：使用便捷方法
+            ReferenceQueryContext sourceTypeContext = ReferenceQueryContext.ofSourceTypes("SampleTask");
+            List<ReferenceInfo> refs4 = service.findReferencers(subTask, sourceTypeContext);
+            assertEquals(1, refs4.size());
+
+            log.info("性能优化场景测试成功完成");
         });
     }
 

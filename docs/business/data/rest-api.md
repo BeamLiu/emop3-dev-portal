@@ -104,8 +104,13 @@ API响应中的`_links`对象包含所有可用的操作链接：
 
 ### 引用关系查询接口
 
--   查找所有引用者：GET `/webconsole/api/references/{id}?isPrecise=[true|false]`
--   按关系类型查找引用者：GET `/webconsole/api/references/{id}/byTypes?relationTypes=ASSOCIATE,STRUCTURAL&isPrecise=[true|false]`
+-   查找所有引用者：GET `/webconsole/api/references/{id}`
+-   按引用类型查找：GET `/webconsole/api/references/{id}?categories=ASSOCIATE,STRUCTURAL,REVISIONABLE`
+-   指定引用者类型（推荐）：GET `/webconsole/api/references/{id}?sourceTypes=SampleTask,Document`
+-   指定关系名称：GET `/webconsole/api/references/{id}?relationNames=reference,target`
+-   版本精确匹配：GET `/webconsole/api/references/{id}?revisionRule=PRECISE`
+
+详细使用说明请参考 [引用关系反向查询文档](./incoming-reference.md)
 
 ### 图搜索接口
 
