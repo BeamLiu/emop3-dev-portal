@@ -382,7 +382,7 @@ cd applications/server-plugins
 EMOP Server启动的时候会从java class定义映射到元数据，然后再将元数据映射到数据库schema，因此启动过程比较长，第一次启动完成后，初始化了对应的数据库的schema后，可以修改`startEMOPServer.bat`中的以下三个启动参数为true，以加快启动速度：
 - skipClass2MetadataSyncChecking：跳过class定义到元数据的映射
 - skipMetadata2TableSyncChecking：跳过元数据到数据库的映射
-- skipMetadataSelfCheck：跳过元数据定义自检查
+- skipMetadataSelfChecking：跳过元数据定义自检查
 
 当修改了 plugin 中的存储class定义，可以把上面几个参数设置为`false`，重启后自动更新对应的元数据和表结构。
 :::
