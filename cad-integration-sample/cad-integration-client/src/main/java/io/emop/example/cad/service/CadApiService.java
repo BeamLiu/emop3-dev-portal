@@ -116,4 +116,32 @@ public class CadApiService {
             throw new RuntimeException("Get失败: HTTP " + response.getStatus() + ": " + response.getBody());
         }
     }
+    
+    /**
+     * 提交CAD模型轻量化转图任务
+     * 用于将大文件转换为轻量化格式（CDXFB）以便界面查看
+     * 转换后的文件会存储在MinIO的 {fileId}/converted/ 子目录下
+     */
+    public String submitConversionJob(Long componentId) throws Exception {
+        String conversionUrl = "http://" + 
+                EMOPConfig.getInstance().getString("EMOP_DOMAIN", "dev.emop.emopdata.com") + 
+                ":860/cad-model-conversion/api/cad/conversion/item/" + componentId + "/convert";
+        log.info("提交轻量化转图任务: componentId={} 至 {}", componentId, conversionUrl);
+        
+        HttpResponse<String> response = Unirest.post(conversionUrl)
+                .header("Content-Type", "application/json")
+                .header("x-user", "{\"userId\":-1,\"authorities\":[\"ADMIN\"]}")
+                .asString();
+        
+        if (response.isSuccess()) {
+            JsonNode jsonNode = objectMapper.readTree(response.getBody());
+            String jobId = jsonNode.get("jobId").asText();
+            String message = jsonNode.get("message").asText();
+            log.info("转图任务提交成功: jobId={}", jobId);
+            log.info("任务状态查看: {}", message);
+            return jobId;
+        } else {
+            throw new RuntimeException("转图任务提交失败: HTTP " + response.getStatus() + ": " + response.getBody());
+        }
+    }
 }

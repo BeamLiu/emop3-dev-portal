@@ -10,6 +10,7 @@ import java.util.List;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PostItemEntityResponse {
+    private Long componentId;
     private List<String> warnings;
     private List<ItemEntity> itemEntities;
 }

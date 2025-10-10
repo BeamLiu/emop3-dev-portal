@@ -120,6 +120,15 @@ mvn exec:java -Dexec.args="open"    # 从EMOP打开场景
        - 上传重组后的ZIP文件
        - 使用UPDATE_ONLY策略更新File对象
        - 传递fileMetadataConfig关联元数据
+
+6. 提交轻量化转图任务
+   └─> POST /api/cad/conversion/item/{componentId}/convert
+       - 针对零件或装配提交转图任务
+       - 转换为轻量化格式（CDXFB）用于界面查看
+       - 返回JobId用于跟踪转图进度
+       - 可通过JobRunr Dashboard查看任务状态
+       - 转换后的文件存储在MinIO的 converted/ 子目录下
+       - 例如：原文件 {fileId}/model.asm → 转换后 {fileId}/converted/model.cdxfb
 ```
 
 #### 关键技术点
@@ -162,6 +171,26 @@ for (Entry<String, Long> entry : fileIdMapping.entrySet()) {
 }
 ```
 
+**D. 轻量化转图任务提交**
+```java
+// 获取根Component的ID
+Long rootComponentId = postResponse.getItemEntities().stream()
+    .filter(e -> e.getRoot() != null && e.getRoot())
+    .map(ItemEntity::getComponentId)
+    .findFirst()
+    .orElseThrow();
+
+// 提交转图任务
+String jobId = cadApiService.submitConversionJob(rootComponentId);
+
+// 查看任务状态
+// http://localhost:861/dashboard/jobs/{jobId}
+
+// 转换后的文件存储位置
+// 原始文件: cad/{fileId}/model.asm
+// 转换文件: cad/{fileId}/converted/model.cdxfb
+```
+
 #### 数据流示例
 
 **输入数据（1_compare_request.json）**
@@ -200,6 +229,15 @@ for (Entry<String, Long> entry : fileIdMapping.entrySet()) {
   "-7206152754037014528/asm0016_asm_1.asm.85": {
     "fileId": -7206152754037014528
   }
+}
+```
+
+**转图任务响应**
+```json
+{
+  "message": "CAD conversion job submitted successfully, check status through: http://localhost:861/dashboard/jobs/01234567-89ab-cdef-0123-456789abcdef",
+  "componentId": 12345,
+  "jobId": "01234567-89ab-cdef-0123-456789abcdef"
 }
 ```
 
@@ -339,6 +377,13 @@ fileStorageService.bulkUploadZip(
 | /api/cad-integration/item | POST | 提交BOM结构 |
 | /api/cad-integration/item/{id} | GET | 获取BOM结构 |
 
+### CAD Conversion API
+
+| 接口 | 方法 | 说明 |
+|------|------|------|
+| /api/cad/conversion/item/{componentId}/convert | POST | 提交轻量化转图任务 |
+| /api/cad/conversion/status/{jobId} | GET | 查询转图任务状态 |
+
 ### File Storage API
 
 | 接口 | 方法 | 说明 |
@@ -365,11 +410,26 @@ A: 它告诉bulk-upload-zip接口每个文件对应的fileId，使用UPDATE_ONLY
 ### Q3: 如何处理大文件上传？
 A: bulk-upload-zip接口支持流式处理，不会将整个ZIP加载到内存。建议单个ZIP不超过2GB。
 
+### Q3.1: 为什么需要轻量化转图？
+A: 大型CAD文件（如装配体）直接在浏览器中查看会很慢或无法加载。轻量化转图将模型转换为CDXFB等轻量化格式，大幅减小文件体积，提升界面查看性能。转图是异步任务，通过JobRunr在后台执行。
+
+### Q3.2: 转换后的文件存储在哪里？
+A: 转换后的轻量化文件存储在MinIO中，与原文件在同一个fileId目录下的 `converted/` 子目录中。例如：
+- 原始文件：`cad/{fileId}/asm0016.asm.85`
+- 转换文件：`cad/{fileId}/converted/asm0016.cdxfb`
+- 这样可以保持文件关联关系清晰，便于管理和访问
+
 ### Q4: 多站点环境下如何选择站点？
 A: 调用site-selection API，系统会根据用户属性（如组织、CAD类型）自动选择最优站点。也可以显式指定站点ID。
 
 ### Q5: Compare接口的作用是什么？
 A: Compare接口用于比对客户端和服务器端的BOM差异，返回带ID的数据，客户端据此更新本地数据。
+
+### Q6: 如何查看转图任务的进度？
+A: 转图任务提交后会返回jobId，可以通过以下方式查看进度：
+- JobRunr Dashboard: http://localhost:861/dashboard/jobs/{jobId}
+- 调用状态查询API: GET /api/cad/conversion/status/{jobId}
+- 转图完成后，轻量化文件会自动关联到对应的Component
 
 ## 扩展开发
 

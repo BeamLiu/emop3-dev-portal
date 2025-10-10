@@ -84,6 +84,14 @@ public class SaveToEmopScenario {
                     fileMetadataConfig);
             log.info("文件上传成功，File对象已更新");
 
+            // 步骤7: 提交轻量化转图任务（针对零件或装配，用于界面查看）
+            log.info("\n步骤7: 提交轻量化转图任务");
+            
+            String conversionJobId = cadApiService.submitConversionJob(postResponse.getComponentId());
+            log.info("轻量化转图任务已提交，JobId: {}", conversionJobId);
+            log.info("可通过 http://localhost:861/dashboard/jobs/{} 查看转图进度", conversionJobId);
+            log.info("转换后的文件将存储在MinIO的 cad:cad/demo/cad-integration-client/{{fileId}}/converted/ 子目录下");
+
             // 清理临时文件
             reorganizedZip.delete();
             originalZip.delete();
