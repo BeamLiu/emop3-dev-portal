@@ -136,7 +136,8 @@ export default withMermaid(
 					  ]
 				  }
               ]
-            }
+            },
+			{ text: '开发者门户指南', link: '/business/developer-portal-guide' }
 		  ]
 		},
 		{
