@@ -158,7 +158,7 @@ public class Customization {
                     retrievedEntity.getFactoryLocation(), retrievedEntity.getManagerUserId());
             log.info("  - 动态属性: department={}, capacity={}, isActive={}",
                     retrievedEntity.get("department"), retrievedEntity.get("capacity"), retrievedEntity.get("isActive"));
-            log.info("  - 复杂对象: location={}", retrievedEntity.get("location"));
+            log.info("  - 复杂对象: location={}", (String) retrievedEntity.get("location"));
             log.info("  - _properties不包含JSONB字段: factoryLocation和managerUserId已正确提取到直接属性");
         });
     }
@@ -230,7 +230,7 @@ public class Customization {
             log.info("Save更新测试验证通过:");
             log.info("  - 更新字段: name={}, factoryLocation={}, department={}",
                     retrievedEntity.getName(), retrievedEntity.getFactoryLocation(), retrievedEntity.get("department"));
-            log.info("  - 新增字段: certification={}", retrievedEntity.get("certification"));
+            log.info("  - 新增字段: certification={}", (String) retrievedEntity.get("certification"));
             log.info("  - 保留字段: managerUserId={}, shift={}, employees={}, equipment={}",
                     retrievedEntity.getManagerUserId(), retrievedEntity.get("shift"),
                     retrievedEntity.get("employees"), retrievedEntity.get("equipment"));
@@ -474,8 +474,8 @@ public class Customization {
             updateData.put("region", "Central");              // 新增JSONB字段
             updateData.put("name", "FastUpdated-" + code);    // 普通列
 
-            int affected = objectService.fastUpdate(entity.getId(), updateData);
-            assertEquals(1, affected);
+            Map<String, Object> affected = objectService.fastUpdate(entity.getId(), updateData);
+            assertFalse(affected.isEmpty());
 
             // 验证结果
             FactoryEntity updated = S.service(RevisionService.class)

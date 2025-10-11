@@ -385,8 +385,8 @@ public class PermissionTest {
             Map<String, Object> updateData = new HashMap<>();
             updateData.put("fileSize", 2048L);
 
-            int updated = objectService.fastUpdate(document.getId(), updateData);
-            assertTrue(updated > 0, "Admin should be able to update documents");
+            Map<String, Object> updated = objectService.fastUpdate(document.getId(), updateData);
+            assertFalse(updated.isEmpty(), "Admin should be able to update documents");
             log.info("Admin successfully updated document: {}", document.getId());
         } finally {
             UserContext.clear();

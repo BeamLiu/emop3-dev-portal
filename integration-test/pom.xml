@@ -24,6 +24,12 @@
             <artifactId>platform-essentials</artifactId>
             <version>${emop.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.emop</groupId>
+            <artifactId>server-plugin-api</artifactId>
+            <version>${emop.version}</version>
+        </dependency>
+
 
         <!-- 测试依赖 -->
         <!-- JUnit 5 Platform Suite -->

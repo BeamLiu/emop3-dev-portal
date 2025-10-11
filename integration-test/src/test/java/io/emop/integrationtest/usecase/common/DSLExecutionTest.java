@@ -810,7 +810,7 @@ public class DSLExecutionTest {
 
         // Save CSV data to a temporary file
         try {
-            S.service(StorageService.class).upload(bucketPath, "parts.csv", csvData.getBytes());
+            S.service(StorageService.class).upload(bucketPath, "parts.csv", csvData.getBytes(), true);
         } catch (Exception e) {
             throw new RuntimeException("Failed to create test CSV file", e);
         }
@@ -858,7 +858,7 @@ public class DSLExecutionTest {
                 """;
 
         try {
-            S.service(StorageService.class).upload(bucketPath, "assembly.csv", csvData.getBytes());
+            S.service(StorageService.class).upload(bucketPath, "assembly.csv", csvData.getBytes(), true);
         } catch (Exception e) {
             throw new RuntimeException("Failed to create test CSV file", e);
         }
@@ -923,7 +923,7 @@ public class DSLExecutionTest {
                 + code2 + ",UP011,A01," + supplierCode2 + ",13900139000,ALT002";
 
         try {
-            S.service(StorageService.class).upload(bucketPath, "parts_complex.csv", csvData.getBytes());
+            S.service(StorageService.class).upload(bucketPath, "parts_complex.csv", csvData.getBytes(), true);
         } catch (Exception e) {
             throw new RuntimeException("Failed to create test CSV file", e);
         }
@@ -1010,9 +1010,9 @@ public class DSLExecutionTest {
 
         try {
             // Save initial CSV data
-            S.service(StorageService.class).upload(bucketPath, "parts_initial.csv", initialCsvData.getBytes());
+            S.service(StorageService.class).upload(bucketPath, "parts_initial.csv", initialCsvData.getBytes(), true);
             // Save update CSV data
-            S.service(StorageService.class).upload(bucketPath, "parts_update.csv", updateCsvData.getBytes());
+            S.service(StorageService.class).upload(bucketPath, "parts_update.csv", updateCsvData.getBytes(), true);
         } catch (Exception e) {
             throw new RuntimeException("Failed to create test CSV files", e);
         }
@@ -1271,7 +1271,7 @@ public class DSLExecutionTest {
                 + code2 + ",UP011,A01," + supplierCode2 + ",13900139000,ALT002";
 
         try {
-            S.service(StorageService.class).upload("/", "parts_complex.csv", csvData.getBytes());
+            S.service(StorageService.class).upload("/", "parts_complex.csv", csvData.getBytes(), true);
         } catch (Exception e) {
             throw new RuntimeException("Failed to create test CSV file", e);
         }

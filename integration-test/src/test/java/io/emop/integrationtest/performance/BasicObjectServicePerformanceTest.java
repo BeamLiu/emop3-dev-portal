@@ -498,13 +498,13 @@ public class BasicObjectServicePerformanceTest {
 
             long startTime = System.nanoTime();
             try {
-                int affectedRows = objectService.fastUpdate(id, updateData);
+                Map<String, Object> affectedRows = objectService.fastUpdate(id, updateData);
                 long endTime = System.nanoTime();
 
                 long latencyNs = endTime - startTime;
                 latencies.add(latencyNs);
 
-                if (affectedRows == 0) {
+                if (affectedRows.isEmpty()) {
                     log.warn("fastUpdate未影响任何行: {}", id);
                 }
             } catch (Exception e) {

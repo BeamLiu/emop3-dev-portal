@@ -929,7 +929,7 @@ public class CacheIntegrationTest {
 
             ModelObject cachedObj = cacheService.get(objectKey, ModelObject.class);
             if (cachedObj != null) {
-                log.debug("Cache updated with transaction changes: {}", cachedObj.get("name"));
+                log.debug("Cache updated with transaction changes: {}", (String) cachedObj.get("name"));
             }
 
         } catch (Exception e) {
@@ -1262,7 +1262,7 @@ public class CacheIntegrationTest {
         // 验证对象缓存状态
         ModelObject cachedChild = cacheService.get(objectKey, ModelObject.class);
         if (cachedChild != null) {
-            log.debug("对象缓存在更新后的状态: {}", cachedChild.get("name"));
+            log.debug("对象缓存在更新后的状态: {}", (String) cachedChild.get("name"));
         }
 
         // 验证关系缓存状态
