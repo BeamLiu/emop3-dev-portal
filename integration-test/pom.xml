@@ -97,14 +97,14 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.2</version>
                 <configuration>
-                    <!-- 只运行指定的测试套件 -->
+                    <!-- 只运行集成测试套件，排除性能测试 -->
                     <includes>
                         <include>**/EmopIntegrationTestSuite.java</include>
-                        <include>**/EmopPerformanceTestSuite.java</include>
                     </includes>
 
-                    <!-- 排除其他测试文件 -->
+                    <!-- 排除性能测试套件和其他测试文件 -->
                     <excludes>
+                        <exclude>**/EmopPerformanceTestSuite.java</exclude>
                         <exclude>**/usecase/*.java</exclude>
                         <exclude>**/performance/*.java</exclude>
                         <exclude>**/*Test.java</exclude>

@@ -19,6 +19,12 @@
             <groupId>io.emop.example</groupId>
             <artifactId>hello-plugin</artifactId>
         </dependency>
+
+        <!-- 包含集成测试的领域模型，作为集成测试的服务端 -->
+        <dependency>
+            <groupId>io.emop</groupId>
+            <artifactId>integration-test</artifactId>
+        </dependency>
         
         <!-- EMOP Platform Dependencies -->
         <dependency>

@@ -45,6 +45,12 @@
                 <version>${emop.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>io.emop</groupId>
+                <artifactId>integration-test</artifactId>
+                <version>${emop.version}</version>
+            </dependency>
+
             <!-- Spring Boot BOM -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
