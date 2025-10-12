@@ -22,6 +22,6 @@ public class CustomCadIntegrationStarter {
         ServiceRegistry.initAllServices();
         ConfigurableApplicationContext cac = SpringApplication.run(CustomCadIntegrationStarter.class, args);
         ServiceRegistry.register(S.ExternalResourceProvider.class, new SpringResourceProvider(cac));
-        log.info("CustomCadIntegrationStarter started, swagger: http://localhost:891/cad-integration-sample/api");
+        log.info("CustomCadIntegrationStarter started, swagger: http://localhost:891/cad-integration/api");
     }
 }

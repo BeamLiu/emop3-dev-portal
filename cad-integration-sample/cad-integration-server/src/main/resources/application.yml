@@ -5,7 +5,7 @@ server:
 
 spring:
   application:
-    name: cad-integration-sample
+    name: cad-integration
 
 springdoc:
   swagger-ui:

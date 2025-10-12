@@ -22,7 +22,7 @@ public class CadApiService {
     
     private static final String CAD_BASE_URL = "http://" + 
             EMOPConfig.getInstance().getString("EMOP_DOMAIN", "dev.emop.emopdata.com") + 
-            ":891/cad-integration-sample/api/cad-integration";
+            ":891/cad-integration/api/cad-integration";
     
     private final ObjectMapper objectMapper = new ObjectMapper();
     private static volatile boolean unirestConfigured = false;

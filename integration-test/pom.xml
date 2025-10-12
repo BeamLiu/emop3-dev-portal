@@ -149,4 +149,16 @@
             </plugin>
         </plugins>
     </build>
+    <distributionManagement>
+        <repository>
+            <id>repo-emop3</id>
+            <name>Release Repository</name>
+            <url>${repo.emop3.release.url}</url>
+        </repository>
+        <snapshotRepository>
+            <id>repo-emop3</id>
+            <name>Snapshot Repository</name>
+            <url>${repo.emop3.snapshot.url}</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>
