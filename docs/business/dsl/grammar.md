@@ -83,6 +83,12 @@ create type com.example.Customer extends AbstractModelObject {
             name.en_US: "Status"
         }
     }
+
+    // 对象类型值, 数据库中使用 jsonb 存储, 在Rest中提交数据可以是json，例如 {cidProps: {key1: val1, key2: val2}}
+    attribute cidProps: Object {
+        required: true
+        description: "分类属性"
+    }
     
     // 级联值域
     attribute province: String {

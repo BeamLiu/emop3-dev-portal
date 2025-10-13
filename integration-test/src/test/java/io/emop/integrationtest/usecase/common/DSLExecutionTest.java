@@ -370,6 +370,10 @@ public class DSLExecutionTest {
                     required: false
                     defaultValue: 10
                   }
+                  attribute cidProps: Object {
+                      required: true
+                      description: "分类属性"
+                  }
                   tableName: Customer
                   schema: sample
                 }
