@@ -115,7 +115,8 @@ export default withMermaid(
 				  text: '前端开发',
 				  collapsed: true,
 				  items: [
-					  { text: '前端渲染定义', link: '/business/frontend/render' }
+					  { text: '前端渲染定义', link: '/business/frontend/render' },
+				  	  { text: '3D模型预览嵌入', link: '/business/frontend/3d-viewer-embed' }
 				  ]
 			  },
 			{
@@ -231,7 +232,7 @@ export default withMermaid(
 				  { text: '转图服务', link: '/plm/cad-conversion' },
 				  { text: '分类管理', link: '/plm/classification' },
 				  { text: '权限配置', link: '/plm/permission' },
-				{ text: 'BOM设计', link: '/plm/bom' }
+				  { text: 'BOM设计', link: '/plm/bom' }
 			  ]
 			},
 			{ text: '演示视频', link: '/plm/video' }
