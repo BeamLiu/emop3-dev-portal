@@ -147,14 +147,14 @@ GET /api/file-proxy/{fileId}/list        # 列出目录下所有文件
 
 假设文件ID为123，对应的存储路径为：
 ```
-cad/demo/cad-integration-client/-1175438643740663548/scenegraph.cdxfb
+cad/demo/cad-integration-client/-1175438643740663548/converted/scenegraph.cdxfb
 ```
 
 系统会自动支持访问同目录下的所有文件：
 ```
 cad/demo/cad-integration-client/-1175438643740663548/
-├── scenegraph.cdxfb                          # 主模型文件
-├── 782d57f2-4ba9-4b38-bf37-0567118abb7b     # 附加文件
+├── onverted/scenegraph.cdxfb                          # 主模型文件
+├── onverted/782d57f2-4ba9-4b38-bf37-0567118abb7b     # 附加文件
 ├── prt0118_1.prt.20                          # 零件文件
 ├── prt0118_1.prt.20.jpg                      # 预览图
 └── ...                                        # 其他相关文件
@@ -163,9 +163,9 @@ cad/demo/cad-integration-client/-1175438643740663548/
 ### 使用示例
 
 ```html
-<!-- 只需要提供文件ID和主模型文件名 -->
+<!-- 只需要提供文件ID -->
 <iframe 
-  src="https://dev.emop.emopdata.com/web/public-3d.html?model=/api/file-proxy/123"
+  src="https://dev.emop.emopdata.com/web/public-3d.html?model=/minioproxy/api/file-proxy/123/converted"
   width="100%" 
   height="600px" 
   frameborder="0"
@@ -174,8 +174,8 @@ cad/demo/cad-integration-client/-1175438643740663548/
 ```
 
 3D查看器会自动加载：
-- `/api/file-proxy/123` （主模型）
-- `/api/file-proxy/123/782d57f2-4ba9-4b38-bf37-0567118abb7b` （附加文件）
+- `/api/file-proxy/123/converted` （主模型）
+- `/api/file-proxy/123/converted/782d57f2-4ba9-4b38-bf37-0567118abb7b` （附加文件）
 - `/api/file-proxy/123/prt0118_1.prt.20.jpg` （预览图）
 - 等等...
 
@@ -309,14 +309,14 @@ cad/demo/cad-integration-client/-1175438643740663548/
         <h1>3D模型预览示例 - 动态加载</h1>
         
         <div class="controls">
-            <input type="text" id="modelInput" placeholder="输入模型地址" value="/api/file-proxy/123">
+            <input type="text" id="modelInput" placeholder="输入模型地址" value="/minioproxy/api/file-proxy/123/converted">
             <button onclick="loadModel()">加载模型</button>
         </div>
         
         <div class="viewer-container">
             <iframe 
                 id="modelViewer"
-                src="https://dev.emop.emopdata.com/web/public-3d.html?model=/api/file-proxy/123"
+                src="https://dev.emop.emopdata.com/web/public-3d.html?model=/minioproxy/api/file-proxy/123"
                 allowfullscreen>
             </iframe>
         </div>
@@ -422,4 +422,3 @@ https://dev.emop.emopdata.com/web/public-3d-test.html
 
 - **测试页面**: `/web/public-3d-test.html`
 - **API文档**: 参考 `FileDirectoryProxyController` 接口文档
-- **技术文档**: `extensions/minio-proxy/FILE-PROXY-SUMMARY.md`
