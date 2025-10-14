@@ -1113,7 +1113,21 @@
             "checkedOutUserName": null,
             "children": [],
             "copyable": true,
-            "drwFiles": [],
+            "drwFiles": [{
+                "checked": false,
+                "checksum": null,
+                "id": null,
+                "name": "prt0055_1.prt.21-1.drw",
+                "path": "D:\\temp\\3d\\",
+                "revisionId": null
+            },{
+                "checked": false,
+                "checksum": null,
+                "id": null,
+                "name": "prt0055_1.prt.21-2.drw",
+                "path": "D:\\temp\\3d\\",
+                "revisionId": null
+            }],
             "dwgFiles": [],
             "errors": [],
             "extraFiles": [],

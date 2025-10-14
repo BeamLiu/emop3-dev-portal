@@ -15,5 +15,4 @@ public class FileEntity {
     private String path;
     private String checksum;
     private Long revisionId;  // 对应的ItemRevision的uid
-    private Boolean checked;
 }

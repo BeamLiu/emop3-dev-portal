@@ -2,6 +2,8 @@ package io.emop.example.cad.scenario;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.emop.example.cad.model.FileEntity;
 import io.emop.example.cad.model.ItemEntity;
 import io.emop.example.cad.model.PostItemEntityResponse;
 import io.emop.example.cad.service.*;
@@ -52,6 +54,10 @@ public class SaveToEmopScenario {
 
             // 步骤3: 提交BOM结构到EMOP（创建Item、Component和File对象）
             log.info("\n步骤3: 提交BOM结构到EMOP");
+            //添加一个drw文件
+            comparedEntities.get(0).getDrwFiles().add(new FileEntity());
+            comparedEntities.get(0).getDrwFiles().get(0).setName("sample.drw");
+            comparedEntities.get(0).getDrwFiles().get(0).setPath("/home/sample/sample.drw");
             PostItemEntityResponse postResponse = cadApiService.postItemEntity(comparedEntities);
             log.info("BOM结构提交成功，File对象已创建");
 
