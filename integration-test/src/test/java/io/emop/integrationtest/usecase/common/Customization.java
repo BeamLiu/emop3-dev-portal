@@ -3,6 +3,8 @@ package io.emop.integrationtest.usecase.common;
 import io.emop.integrationtest.domain.FactoryEntity;
 import io.emop.integrationtest.domain.UserLocationEntity;
 import io.emop.integrationtest.util.TimerUtils;
+import io.emop.model.cad.CADComponent;
+import io.emop.model.common.CheckoutInfo;
 import io.emop.model.common.ItemRevision;
 import io.emop.model.common.ModelObject;
 import io.emop.model.common.ObjectRef;
@@ -10,8 +12,10 @@ import io.emop.model.common.Revisionable.CriteriaByCodeAndRevId;
 import io.emop.model.common.UserContext;
 import io.emop.model.query.Q;
 import io.emop.service.S;
+import io.emop.service.api.data.NativeSqlService;
 import io.emop.service.api.data.ObjectService;
 import io.emop.service.api.domain.common.RevisionService;
+import io.emop.service.api.dsl.DSLExecutionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
@@ -23,6 +27,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static io.emop.integrationtest.util.Assertion.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * 自定义属性及对象测试 - 包含JSONB merge更新测试
@@ -352,11 +358,197 @@ public class Customization {
     }
 
     /**
+     * 测试 Object 类型属性的 JSON 序列化
+     * 包括 Map 和自定义对象（CheckoutInfo）
+     */
+    @Test
+    @Order(11)
+    public void testObjectTypeJsonSerialization() {
+        log.info("=== 开始测试 Object 类型属性的 JSON 序列化 ===");
+
+        TimerUtils.measureExecutionTime("Object 类型 JSON 序列化测试", () -> {
+            // 1. 使用 DSL 创建类型定义
+            String dsl = """
+                    create type com.example.CADComponentEmbeddingComplexObject extends io.emop.model.cad.CADComponent {
+                        attribute cidProps: Object {
+                            required: true
+                            description: "分类信息"
+                        }
+                        attribute checkoutInfo: Object {
+                            required: true
+                            description: "签出信息"
+                        }
+                        schema: SAMPLE
+                        tableName: CAD_Component_Embedding_Complex_Object
+                    } if not exists
+                    """;
+
+            try {
+                Object result = S.service(DSLExecutionService.class).execute(dsl);
+                assertNotNull(result);
+                log.info("创建类型定义结果: {}", result);
+            } catch (Exception e) {
+                log.warn("类型可能已存在，跳过创建: {}", e.getMessage());
+            }
+
+            // 2. 创建测试对象
+            String code = "CAD-OBJ-" + dateCode;
+            CADComponent cadComponent = new CADComponent("CADComponentEmbeddingComplexObject");
+
+            cadComponent.setCode(code);
+            cadComponent.setRevId(revId);
+            cadComponent.setName("Test CAD Component with Complex Objects");
+            cadComponent.setComponentType("ASM");
+
+            // 2.1 设置 cidProps 为 Map
+            Map<String, Object> cidProps = new HashMap<>();
+            cidProps.put("category", "Mechanical");
+            cidProps.put("subCategory", "Fastener");
+            cidProps.put("material", "Steel");
+            cidProps.put("weight", 0.5);
+            cidProps.put("dimensions", Map.of(
+                    "length", 10.5,
+                    "width", 5.2,
+                    "height", 3.1
+            ));
+            cidProps.put("certifications", List.of("ISO9001", "RoHS", "CE"));
+            cadComponent.set("cidProps", cidProps);
+
+            // 2.2 设置 checkoutInfo 为自定义对象
+            CheckoutInfo checkoutInfo = CheckoutInfo.createCheckout("Testing object serialization", 60);
+            cadComponent.set("checkoutInfo", checkoutInfo);
+
+            log.info("保存前对象状态:");
+            log.info("  - cidProps (Map): {}", (Object) cadComponent.get("cidProps"));
+            log.info("  - checkoutInfo (CheckoutInfo): {}", (Object) cadComponent.get("checkoutInfo"));
+
+            // 3. 保存对象
+            ObjectService objectService = S.service(ObjectService.class);
+            ModelObject savedObject = objectService.save(cadComponent);
+            assertNotNull(savedObject.getId());
+            log.info("对象已保存，ID: {}", savedObject.getId());
+
+            // 3.1 确认数据库是JSONB格式而不是简单的字符串
+            List<List<?>> result = S.service(NativeSqlService.class).executeNativeQuery(
+                                "select cidprops->'category' as category from sample.cad_component_embedding_complex_object where id=?",
+                                savedObject.getId());
+            assertEquals("\"Mechanical\"", result.get(0).get(0));
+
+            // 4. 从数据库重新查询验证
+            ModelObject retrievedObject = new ObjectRef<>(savedObject.getId()).unbox();
+            assertNotNull(retrievedObject);
+
+            // 4.1 验证 Map 类型的 cidProps
+            Object retrievedCidProps = retrievedObject.get("cidProps");
+            assertNotNull("cidProps should not be null", retrievedCidProps);
+            assertTrue("cidProps should be a Map", retrievedCidProps instanceof Map);
+
+            Map<String, Object> retrievedCidPropsMap = (Map<String, Object>) retrievedCidProps;
+            assertEquals("Mechanical", retrievedCidPropsMap.get("category"));
+            assertEquals("Fastener", retrievedCidPropsMap.get("subCategory"));
+            assertEquals("Steel", retrievedCidPropsMap.get("material"));
+            assertEquals(0.5, ((Number) retrievedCidPropsMap.get("weight")).doubleValue(), 0.001);
+
+            // 验证嵌套 Map
+            Map<String, Object> dimensions = (Map<String, Object>) retrievedCidPropsMap.get("dimensions");
+            assertNotNull("dimensions should not be null", dimensions);
+            assertEquals(10.5, ((Number) dimensions.get("length")).doubleValue(), 0.001);
+            assertEquals(5.2, ((Number) dimensions.get("width")).doubleValue(), 0.001);
+            assertEquals(3.1, ((Number) dimensions.get("height")).doubleValue(), 0.001);
+
+            // 验证 List
+            List<String> certifications = (List<String>) retrievedCidPropsMap.get("certifications");
+            assertNotNull("certifications should not be null", certifications);
+            assertEquals(3, certifications.size());
+            assertTrue(certifications.contains("ISO9001"));
+            assertTrue(certifications.contains("RoHS"));
+            assertTrue(certifications.contains("CE"));
+
+            // 4.2 验证自定义对象 checkoutInfo
+            Object retrievedCheckoutInfo = retrievedObject.get("checkoutInfo");
+            assertNotNull("checkoutInfo should not be null", retrievedCheckoutInfo);
+            assertTrue("checkoutInfo should be a CheckoutInfo",
+                    retrievedCheckoutInfo instanceof CheckoutInfo);
+
+            CheckoutInfo checkoutInfoMap =  (CheckoutInfo) retrievedCheckoutInfo;
+            assertNotNull("checkedoutByUserId should not be null",
+                    checkoutInfoMap.getCheckedoutByUserId());
+            assertEquals("Testing object serialization", checkoutInfoMap.getComment());
+            assertEquals(60, ((Number) checkoutInfoMap.getExpiryMinutes()).intValue());
+            assertNotNull("checkoutDate should not be null", checkoutInfoMap.getCheckoutDate());
+
+            log.info("查询验证通过:");
+            log.info("  - cidProps 正确序列化为 JSON: {}", retrievedCidProps);
+            log.info("  - checkoutInfo 正确序列化为 JSON: {}", retrievedCheckoutInfo);
+
+            // 5. 测试更新操作
+            Map<String, Object> updateData = new HashMap<>();
+
+            // 更新 cidProps
+            Map<String, Object> updatedCidProps = new HashMap<>(cidProps);
+            updatedCidProps.put("material", "Aluminum");
+            updatedCidProps.put("supplier", "ACME Corp");
+            updateData.put("cidProps", updatedCidProps);
+
+            // 更新 checkoutInfo
+            CheckoutInfo updatedCheckoutInfo = CheckoutInfo.createCheckout("Updated checkout", 120);
+            updateData.put("checkoutInfo", updatedCheckoutInfo);
+
+            objectService.update(savedObject.getId(), savedObject.get("_version"), updateData);
+
+            // 5.1 确认数据库是JSONB格式而不是简单的字符串
+            result = S.service(NativeSqlService.class).executeNativeQuery(
+                                "select cidprops->'material' as category from sample.cad_component_embedding_complex_object where id=?",
+                                savedObject.getId());
+            assertEquals("\"Aluminum\"", result.get(0).get(0));
+
+            // 6. 验证更新后的数据
+            ModelObject updatedObject = new ObjectRef<>(savedObject.getId()).unbox();
+
+            Map<String, Object> finalCidProps = updatedObject.get("cidProps", Map.class);
+            assertEquals("Aluminum", finalCidProps.get("material"));
+            assertEquals("ACME Corp", finalCidProps.get("supplier"));
+            assertEquals("Mechanical", finalCidProps.get("category")); // 应该保留
+
+            CheckoutInfo finalCheckoutInfo = updatedObject.get("checkoutInfo", CheckoutInfo.class);
+            assertEquals("Updated checkout", finalCheckoutInfo.getComment());
+            assertEquals(120, finalCheckoutInfo.getExpiryMinutes());
+
+            log.info("更新验证通过:");
+            log.info("  - cidProps 更新后: {}", finalCidProps);
+            log.info("  - checkoutInfo 更新后: {}", finalCheckoutInfo);
+
+            // 7. 测试 fastUpdate
+            Map<String, Object> fastUpdateData = new HashMap<>();
+            Map<String, Object> fastCidProps = new HashMap<>();
+            fastCidProps.put("status", "active");
+            fastCidProps.put("lastModified", System.currentTimeMillis());
+            fastUpdateData.put("cidProps", fastCidProps);
+
+            objectService.fastUpdate(savedObject.getId(), fastUpdateData);
+            result = S.service(NativeSqlService.class).executeNativeQuery(
+                                "select cidprops->'status' as category from sample.cad_component_embedding_complex_object where id=?",
+                                savedObject.getId());
+            assertEquals("\"active\"", result.get(0).get(0));
+
+            ModelObject fastUpdatedObject = new ObjectRef<>(savedObject.getId()).unbox();
+            Map<String, Object> fastFinalCidProps = fastUpdatedObject.get("cidProps", Map.class);
+            assertEquals("active", fastFinalCidProps.get("status"));
+            assertNotNull(fastFinalCidProps.get("lastModified"));
+
+            log.info("FastUpdate 验证通过:");
+            log.info("  - cidProps 快速更新后: {}", fastFinalCidProps);
+
+            log.info("=== Object 类型 JSON 序列化测试全部通过 ===");
+        });
+    }
+
+    /**
      * 测试复杂的JSONB场景
      * 包括空值处理、类型转换、嵌套对象等
      */
     @Test
-    @Order(11)
+    @Order(12)
     public void testJsonbComplexScenarios() {
         log.info("=== 开始测试JSONB复杂场景 ===");
 
@@ -679,7 +871,7 @@ public class Customization {
                 .query();
         log.info("query result: {}", entities);
         assertEquals(1, entities.size());
-        assertEquals(100l, entities.get(0).getManagerUserId());
+        assertEquals((Long) 100l, (Long) entities.get(0).getManagerUserId());
         assertEquals("Zhuhai", entities.get(0).getFactoryLocation());
 
         entities = Q.result(FactoryEntity.class)
