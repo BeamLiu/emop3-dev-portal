@@ -24,11 +24,10 @@ public class ZipReorganizer {
      * 
      * @param originalZipFile  原始ZIP文件
      * @param rawFileIdMapping 文件名到fileId的映射
-     * @return 重组后的ZIP文件及新的zip中文件路径到fileId的映射
+     * @return 重组后的ZIP文件（包含 __file_metadata__.json）
      * @throws IOException 读取或写入文件时抛出异常
      */
-    public Tuple2<File, Map<String, Long>> reorganizeZip(File originalZipFile, Map<String, Long> rawFileIdMapping)
-            throws IOException {
+    public File reorganizeZip(File originalZipFile, Map<String, Long> rawFileIdMapping) throws IOException {
         log.info("开始重组ZIP文件");
 
         Map<String, Long> newFileIdMapping = new HashMap<>();
@@ -77,10 +76,27 @@ public class ZipReorganizer {
                 zos.closeEntry();
                 zis.closeEntry();
             }
+
+            // 添加元数据配置文件到ZIP
+            addMetadataFileToZip(zos, newFileIdMapping);
         }
 
-        log.info("ZIP文件重组完成");
-        return new Tuple2<File, Map<String, Long>>(newZipFile, newFileIdMapping);
+        log.info("ZIP文件重组完成，包含 {} 个文件的元数据配置", newFileIdMapping.size());
+        return newZipFile;
+    }
+
+    /**
+     * 将元数据配置文件添加到ZIP中
+     */
+    private void addMetadataFileToZip(ZipOutputStream zos, Map<String, Long> fileIdMapping) throws IOException {
+        String metadataJson = generateFileMetadataConfig(fileIdMapping);
+        
+        ZipEntry metadataEntry = new ZipEntry("__file_metadata__.json");
+        zos.putNextEntry(metadataEntry);
+        zos.write(metadataJson.getBytes("UTF-8"));
+        zos.closeEntry();
+        
+        log.info("已添加 __file_metadata__.json 到ZIP文件");
     }
 
     /**

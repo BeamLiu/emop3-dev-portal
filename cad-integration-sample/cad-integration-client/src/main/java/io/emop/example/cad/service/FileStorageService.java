@@ -85,9 +85,9 @@ public class FileStorageService {
     
     /**
      * 批量上传ZIP文件
+     * ZIP文件内应包含 __file_metadata__.json 文件来配置元数据
      */
-    public void bulkUploadZip(File zipFile, String bucket, String basePath, 
-                              String strategy, String fileMetadataConfig) throws Exception {
+    public void bulkUploadZip(File zipFile, String bucket, String basePath, String strategy) throws Exception {
         SiteSelectionResult minioProxySelectionResult = selectMinioProxy("cad", null); // 预选站点，日志记录    
         log.info("请使用预选站点: siteId={}, proxyUrl={}, actualBucket={}", 
                 minioProxySelectionResult.siteId, 
@@ -102,7 +102,6 @@ public class FileStorageService {
                 .queryString("bucket", minioProxySelectionResult.actualBucket)
                 .queryString("basePath", basePath)
                 .queryString("strategy", strategy)
-                .queryString("fileMetadataConfig", fileMetadataConfig)
                 .field("file", zipFile)
                 .asString();
         

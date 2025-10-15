@@ -129,6 +129,10 @@ mvn exec:java -Dexec.args="open"    # 从EMOP打开场景
        - 可通过JobRunr Dashboard查看任务状态
        - 转换后的文件存储在MinIO的 converted/ 子目录下
        - 例如：原文件 {fileId}/model.asm → 转换后 {fileId}/converted/model.cdxfb
+
+7. 在线看图
+   └─> https://dev.emop.emopdata.com/web/public-3d-test.html
+       - 预览转换完成的轻量化内容
 ```
 
 #### 关键技术点

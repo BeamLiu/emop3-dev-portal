@@ -253,13 +253,13 @@ GET /api/file/direct-upload-ticket?bucket={bucket}&targetPath={path}&filename={f
 GET /api/file/{fileId}/access-ticket?expiryMinutes={minutes}&fullInternalPath={boolean}
 
 # 批量通过zip上传，会解压zip的内容然后按zip中路径存储，支持文件元数据配置
-POST /api/file/bulk-upload-zip?bucket={bucket}&basePath={path}&strategy={strategy}&fileMetadataConfig={config}
+POST /api/file/bulk-upload-zip?bucket={bucket}&basePath={path}&strategy={strategy}
 Content-Type: multipart/form-data
-Body: file (zip文件)
+Body: file (zip文件，可在根目录包含 __file_metadata__.json)
 
 参数说明：
 - strategy: 元数据更新策略 (CREATE_ONLY/UPDATE_ONLY/CREATE_OR_UPDATE)
-- fileMetadataConfig: JSON格式的文件元数据配置
+- 元数据配置：在ZIP根目录放置 __file_metadata__.json 文件（可选）
 
 # 按文件ID批量下载
 POST /api/file/bulk-download-by-ids-zip?zipFileName={name}
@@ -336,96 +336,169 @@ public enum MetadataStrategy {
 }
 ```
 
-#### 文件元数据配置格式
+#### 文件元数据配置方式
 
-如果给定`fileId`则会根据id进行更新，否则是创建动作，当然要依据全局的`MetadataStrategy`配置
+**推荐方式：在 ZIP 文件中包含 `__file_metadata__.json`**
+
+在 ZIP 文件的根目录放置 `__file_metadata__.json` 文件，系统会自动读取并应用配置。该文件不会被上传到 MinIO，仅用于配置。
+
+**配置格式：**
+
 ```json
 {
-  "file1.pdf": {
-    "fileId": 123,
+  "2604230192773361664/零件-23.0525.1.SLDPRT": {
+    "fileId": 2604230192773361664,
     "additionalProperties": {
       "projectId": "456",
-      "category": "report",
-      "status": "draft"
+      "category": "part",
+      "status": "active"
     }
   },
-  "file2.docx": {
+  "2604231086126559232/装配体.23.0530.2.SLDASM": {
+    "fileId": 2604231086126559232,
     "additionalProperties": {
       "projectId": "456", 
-      "category": "document"
+      "category": "assembly"
     }
   }
 }
 ```
 
+**路径格式说明：**
+- 支持正斜杠 `/` 和反斜杠 `\` 两种路径分隔符
+- 系统会自动规范化路径，确保正确匹配
+- 路径应与 ZIP 内的文件路径一致
+
+**ZIP 文件结构示例：**
+```
+upload.zip
+├── __file_metadata__.json          # 元数据配置文件（不会上传到MinIO）
+├── 2604230192773361664/
+│   ├── 零件-23.0525.1.SLDPRT      # 主文件
+│   └── 零件-23.0525.1.SLDPRT.jpg  # 附加文件（缩略图）
+└── 2604231086126559232/
+    ├── 装配体.23.0530.2.SLDASM
+    └── 装配体.23.0530.2.SLDASM.jpg
+```
+
+**配置规则：**
+- 如果给定 `fileId` 则会根据 id 进行更新，否则是创建动作
+- 具体行为依据全局的 `MetadataStrategy` 配置
+- 附加文件（如 `.jpg`）不需要单独配置元数据，会自动关联到主文件
+
 #### 使用示例
 
+**示例 1：准备包含元数据的 ZIP 文件**
+
 ```java
-// 1. 批量更新现有文件
+// 1. 创建元数据配置
+Map<String, Object> metadataConfig = new HashMap<>();
+metadataConfig.put("2604230192773361664/零件-23.0525.1.SLDPRT", Map.of(
+    "fileId", 2604230192773361664L,
+    "additionalProperties", Map.of(
+        "projectId", projectId.toString(),
+        "category", "part",
+        "status", "active"
+    )
+));
+
+// 2. 将元数据写入 ZIP 文件
+try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipFile))) {
+    // 添加元数据配置文件
+    ZipEntry metadataEntry = new ZipEntry("__file_metadata__.json");
+    zos.putNextEntry(metadataEntry);
+    String metadataJson = objectMapper.writeValueAsString(metadataConfig);
+    zos.write(metadataJson.getBytes("UTF-8"));
+    zos.closeEntry();
+    
+    // 添加实际文件
+    ZipEntry fileEntry = new ZipEntry("2604230192773361664/零件-23.0525.1.SLDPRT");
+    zos.putNextEntry(fileEntry);
+    // ... 写入文件内容
+    zos.closeEntry();
+}
+```
+
+**示例 2：批量更新现有文件**
+
+```java
 @PostMapping("/projects/{projectId}/documents/bulk-update")
 public ResponseEntity<ZipUploadResult> bulkUpdateDocuments(
         @PathVariable Long projectId,
         @RequestParam("file") MultipartFile zipFile) {
     
-    // 构建元数据配置
-    Map<String, Object> config = Map.of(
-        "report.pdf", Map.of(
-            "fileId", 123L,
-            "additionalProperties", Map.of(
-                "projectId", projectId.toString(),
-                "status", "updated"
-            )
-        )
-    );
+    // ZIP 文件已包含 __file_metadata__.json，直接上传
+    // 使用 UPDATE_ONLY 策略
+    HttpResponse<String> response = Unirest.post(minioProxyUrl + "/api/file/bulk-upload-zip")
+        .queryString("bucket", "documents")
+        .queryString("basePath", "projects/" + projectId)
+        .queryString("strategy", "UPDATE_ONLY")
+        .field("file", zipFile)
+        .asString();
     
-    String configJson = objectMapper.writeValueAsString(config);
-    
-    // 调用批量上传，使用UPDATE_ONLY策略
-    return minioProxyClient.bulkUploadZip(
-        zipFile, 
-        "documents", 
-        "projects/" + projectId,
-        MetadataStrategy.UPDATE_ONLY,
-        configJson
-    );
+    return ResponseEntity.ok(parseResponse(response.getBody()));
 }
+```
 
-// 2. 批量创建新文件记录
+**示例 3：批量创建新文件记录**
+
+```java
 @PostMapping("/projects/{projectId}/documents/bulk-create")
 public ResponseEntity<ZipUploadResult> bulkCreateDocuments(
         @PathVariable Long projectId,
         @RequestParam("file") MultipartFile zipFile) {
     
-    // 使用CREATE_ONLY策略，不需要fileId
-    Map<String, Object> config = Map.of(
-        "newfile.pdf", Map.of(
-            "additionalProperties", Map.of(
-                "projectId", projectId.toString(),
-                "category", "new_document"
-            )
-        )
-    );
+    // 使用 CREATE_ONLY 策略，不需要在元数据中指定 fileId
+    // 系统会自动生成新的 fileId
+    HttpResponse<String> response = Unirest.post(minioProxyUrl + "/api/file/bulk-upload-zip")
+        .queryString("bucket", "documents")
+        .queryString("basePath", "projects/" + projectId)
+        .queryString("strategy", "CREATE_ONLY")
+        .field("file", zipFile)
+        .asString();
     
-    return minioProxyClient.bulkUploadZip(
-        zipFile,
-        "documents", 
-        "projects/" + projectId,
-        MetadataStrategy.CREATE_ONLY,
-        objectMapper.writeValueAsString(config)
-    );
+    return ResponseEntity.ok(parseResponse(response.getBody()));
 }
+```
+
+**示例 4：使用 curl 测试**
+
+```bash
+# 准备 ZIP 文件（包含 __file_metadata__.json）
+curl -X POST "http://localhost:9003/minioproxy/api/file/bulk-upload-zip?bucket=cad&basePath=demo&strategy=UPDATE_ONLY" \
+  -H "x-user: {\"userId\":-1,\"authorities\":[\"ADMIN\"]}" \
+  -F "file=@upload.zip"
 ```
 
 #### 注意事项
 
 1. **策略选择**：
-    - `CREATE_ONLY`：适用于上传全新文件，系统会自动生成fileId
-    - `UPDATE_ONLY`：适用于更新现有文件，必须提供fileId
-    - `CREATE_OR_UPDATE`：混合场景，有fileId则更新，无fileId则创建
+    - `CREATE_ONLY`：适用于上传全新文件，系统会自动生成 fileId
+    - `UPDATE_ONLY`：适用于更新现有文件，必须在元数据中提供 fileId
+    - `CREATE_OR_UPDATE`：混合场景，有 fileId 则更新，无 fileId 则创建
 
-2. **错误处理**：
-    - UPDATE_ONLY模式下，如果fileId不存在会抛出异常
+2. **路径匹配**：
+    - 元数据配置中的路径必须与 ZIP 内的文件路径一致
+    - 支持正斜杠 `/` 和反斜杠 `\` 两种格式，系统会自动规范化
+    - 路径区分大小写
+
+3. **附加文件处理**：
+    - 附加文件（如 `.jpg` 缩略图）不需要单独配置元数据
+    - 附加文件会自动关联到主文件，无需在 `__file_metadata__.json` 中列出
+
+4. **元数据配置文件**：
+    - `__file_metadata__.json` 必须放在 ZIP 根目录
+    - 该文件不会被上传到 MinIO，仅用于配置
+    - 如果 ZIP 中没有该文件，则不应用任何元数据配置
+
+5. **错误处理**：
+    - `UPDATE_ONLY` 模式下，如果 fileId 不存在会抛出异常
     - 文件上传成功但元数据更新失败时，文件仍会保留在存储中
+    - 如果元数据配置中有重复的 fileId，会抛出验证异常
+
+6. **性能优化**：
+    - 系统会批量处理元数据操作，提升性能
+    - 大量文件时建议使用 `UPDATE_ONLY` 或 `CREATE_ONLY` 策略，避免 `CREATE_OR_UPDATE` 的额外判断开销
 
 ## 7. 文件存储安全机制
 

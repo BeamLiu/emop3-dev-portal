@@ -66,28 +66,25 @@ public class SaveToEmopScenario {
             Map<String, Long> rawFileIdMapping = idMappingService.extractFileIdMapping(postResponse.getItemEntities());
             log.info("提取到 {} 个文件ID映射", rawFileIdMapping.size());
 
-            // 步骤5: 重组ZIP文件并上传
-            log.info("\n步骤5: 重组ZIP文件并上传");
+            // 步骤5: 重组ZIP文件（包含元数据配置）
+            log.info("\n步骤5: 重组ZIP文件（包含元数据配置）");
             InputStream zipStream = getClass().getClassLoader()
                     .getResourceAsStream("test-data/3_1_creo-upload17453228522993597702.zip");
             // 将 classpath 中的 ZIP 复制到临时文件
             File originalZip = File.createTempFile("cad-upload-", ".zip");
             Files.copy(zipStream, originalZip.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
             zipStream.close();
-            Tuple2<File, Map<String, Long>> tuple2 = zipReorganizer.reorganizeZip(originalZip, rawFileIdMapping);
-            File reorganizedZip = tuple2.first();
-            String fileMetadataConfig = zipReorganizer.generateFileMetadataConfig(tuple2.second());
-            log.info("ZIP文件重组完成: {}", reorganizedZip.getAbsolutePath());
+            File reorganizedZip = zipReorganizer.reorganizeZip(originalZip, rawFileIdMapping);
+            log.info("ZIP文件重组完成（包含 __file_metadata__.json）: {}", reorganizedZip.getAbsolutePath());
 
             // 步骤6: 批量上传ZIP文件（UPDATE_ONLY）
             log.info("\n步骤6: 批量上传ZIP文件更新File对象（UPDATE_ONLY）");
-            log.info("File Metadata Config: {}", Utils.previewString(fileMetadataConfig));
+            log.info("元数据配置已包含在ZIP文件的 __file_metadata__.json 中");
             fileStorageService.bulkUploadZip(
                     reorganizedZip,
                     "cad",
                     "demo/cad-integration-client",
-                    "UPDATE_ONLY",
-                    fileMetadataConfig);
+                    "UPDATE_ONLY");
             log.info("文件上传成功，File对象已更新");
 
             // 步骤7: 提交轻量化转图任务（针对零件或装配，用于界面查看）
