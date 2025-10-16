@@ -41,7 +41,20 @@ cad-integration-server/
 - 保存后：发送通知、触发工作流
 - 加载后：补充额外信息（如ERP数据）
 
-### 2. CadPropertyProcessor - 属性处理扩展点
+### 2. ItemPrivilegeProcessor - 权限处理扩展点
+
+提供ItemEntity权限设置的定制化能力：
+
+- `processPrivilege(entity)` - 处理单个ItemEntity的权限
+
+**示例用途：**
+- 根据生命周期状态设置权限
+- 根据用户角色设置权限（只有所有者可编辑）
+- 根据Item类型设置权限
+- 根据CAD客户端类型设置权限
+- 根据业务规则设置权限
+
+### 3. CadPropertyProcessor - 属性处理扩展点
 
 提供属性转换、验证等定制化能力：
 
@@ -55,7 +68,7 @@ cad-integration-server/
 - 必填字段验证
 - 业务规则验证
 
-### 3. CadBomStructureProcessor - BOM结构处理扩展点
+### 4. CadBomStructureProcessor - BOM结构处理扩展点
 
 提供BOM结构处理的定制化能力：
 
@@ -67,7 +80,7 @@ cad-integration-server/
 - 调整BOM层级
 - 自定义ItemCode生成规则
 
-### 4. CadFileProcessor - 文件处理扩展点
+### 5. CadFileProcessor - 文件处理扩展点
 
 提供文件处理的定制化能力：
 
@@ -79,7 +92,7 @@ cad-integration-server/
 - 文件类型自定义判断
 - 文件转换
 
-### 5. CadValidationProcessor - 验证扩展点
+### 6. CadValidationProcessor - 验证扩展点
 
 提供自定义验证逻辑：
 
