@@ -80,6 +80,18 @@ public class PipelineRevisionTest {
         S.withStrongConsistency(this::testEdgeCasesImpl);
     }
 
+    @Test
+    @Order(7)
+    public void testReviseWithProperties() {
+        S.withStrongConsistency(this::testReviseWithPropertiesImpl);
+    }
+
+    @Test
+    @Order(8)
+    public void testPipelineReviseWithProperties() {
+        S.withStrongConsistency(this::testPipelineReviseWithPropertiesImpl);
+    }
+
     /**
      * 测试基本版本创建功能
      */
@@ -521,6 +533,146 @@ public class PipelineRevisionTest {
         allIds.addAll(savedObjects.stream().map(ModelObject::getId).collect(Collectors.toList()));
         allIds.addAll(savedObjects2.stream().map(ModelObject::getId).collect(Collectors.toList()));
         allIds.addAll(savedObjects3.stream().map(ModelObject::getId).collect(Collectors.toList()));
+        objectService.forceDelete(allIds);
+    }
+
+    /**
+     * 测试修订时更新属性功能
+     */
+    private void testReviseWithPropertiesImpl() {
+        final String dateCode = String.valueOf(System.currentTimeMillis());
+        log.info("=== 测试修订时更新属性功能 ===");
+
+        ObjectService objectService = S.service(ObjectService.class);
+        RevisionService revisionService = S.service(RevisionService.class);
+
+        // 准备测试数据
+        List<ItemRevision> testData = prepareTestData(dateCode, smallBatchSize, "revise-props-test");
+        List<ItemRevision> savedObjects = objectService.saveAll(testData);
+
+        // 必须先发布才能进行版本修订
+        List<ItemRevision> releasedObjects = S.service(LifecycleService.class).moveToState(savedObjects, LifecycleState.STATE_RELEASED);
+
+        TimerUtils.measureExecutionTime("修订时更新属性测试", () -> {
+            // 测试单个修订并更新属性
+            ItemRevision firstObj = releasedObjects.get(0);
+            String originalName = firstObj.getName();
+            
+            java.util.Map<String, Object> properties = new java.util.HashMap<>();
+            properties.put("name", "更新后的名称-" + dateCode);
+            
+            RevisionService.ReviseRequest<ItemRevision> request = new RevisionService.ReviseRequest<>(
+                    firstObj, CopyRule.NoCopy, properties);
+            
+            ItemRevision revisedObj = revisionService.revise(request);
+            
+            assertNotNull(revisedObj);
+            assertEquals("B", revisedObj.getRevId());
+            assertEquals("更新后的名称-" + dateCode, revisedObj.getName());
+            assertNotEquals(originalName, revisedObj.getName());
+            log.info("✅ 单个修订更新属性成功: {} -> {}", originalName, revisedObj.getName());
+
+            // 测试批量修订并更新属性（统一属性）
+            List<ItemRevision> batchObjects = releasedObjects.subList(1, 4);
+            
+            java.util.Map<String, Object> batchProperties = new java.util.HashMap<>();
+            batchProperties.put("name", "批量更新的名称-" + dateCode);
+            
+            List<RevisionService.ReviseRequest<ItemRevision>> batchRequests = batchObjects.stream()
+                    .map(obj -> new RevisionService.ReviseRequest<>(obj, CopyRule.NoCopy, batchProperties))
+                    .collect(Collectors.toList());
+            
+            List<ItemRevision> revisedBatch = revisionService.revise(batchRequests);
+            
+            assertEquals(3, revisedBatch.size());
+            for (ItemRevision item : revisedBatch) {
+                assertEquals("B", item.getRevId());
+                assertEquals("批量更新的名称-" + dateCode, item.getName());
+            }
+            log.info("✅ 批量修订更新属性成功: {} 个对象", revisedBatch.size());
+
+            // 测试批量修订并更新属性（每个对象不同属性）
+            List<ItemRevision> individualObjects = releasedObjects.subList(4, 7);
+            
+            List<RevisionService.ReviseRequest<ItemRevision>> individualRequests = new ArrayList<>();
+            for (int i = 0; i < individualObjects.size(); i++) {
+                java.util.Map<String, Object> props = new java.util.HashMap<>();
+                props.put("name", "独立更新-" + i + "-" + dateCode);
+                individualRequests.add(new RevisionService.ReviseRequest<>(individualObjects.get(i), CopyRule.NoCopy, props));
+            }
+            
+            List<ItemRevision> individualRevised = revisionService.revise(individualRequests);
+            
+            assertEquals(3, individualRevised.size());
+            for (int i = 0; i < individualRevised.size(); i++) {
+                ItemRevision item = individualRevised.get(i);
+                assertEquals("B", item.getRevId());
+                assertEquals("独立更新-" + i + "-" + dateCode, item.getName());
+            }
+            log.info("✅ 批量修订独立属性更新成功: {} 个对象", individualRevised.size());
+        });
+
+        // 清理测试数据
+        List<Long> allIds = new ArrayList<>();
+        allIds.addAll(savedObjects.stream().map(ModelObject::getId).collect(Collectors.toList()));
+        objectService.forceDelete(allIds);
+    }
+
+    /**
+     * 测试Pipeline修订时更新属性功能
+     */
+    private void testPipelineReviseWithPropertiesImpl() {
+        final String dateCode = String.valueOf(System.currentTimeMillis());
+        log.info("=== 测试Pipeline修订时更新属性功能 ===");
+
+        ObjectService objectService = S.service(ObjectService.class);
+
+        // 准备测试数据
+        List<ItemRevision> testData = prepareTestData(dateCode, smallBatchSize, "pipeline-props-test");
+        List<ItemRevision> savedObjects = objectService.saveAll(testData);
+
+        // 必须先发布才能进行版本修订
+        List<ItemRevision> releasedObjects = S.service(LifecycleService.class).moveToState(savedObjects, LifecycleState.STATE_RELEASED);
+
+        TimerUtils.measureExecutionTime("Pipeline修订更新属性测试", () -> {
+            RevisionServicePipeline pipeline = RevisionService.pipeline();
+
+            // 为每个对象准备不同的属性更新
+            List<ResultFuture<ItemRevision>> futures = new ArrayList<>();
+            for (int i = 0; i < releasedObjects.size(); i++) {
+                ItemRevision obj = releasedObjects.get(i);
+                
+                java.util.Map<String, Object> properties = new java.util.HashMap<>();
+                properties.put("name", "Pipeline更新-" + i + "-" + dateCode);
+                
+                RevisionService.ReviseRequest<ItemRevision> request = new RevisionService.ReviseRequest<>(
+                        obj, CopyRule.NoCopy, properties);
+                
+                futures.add(pipeline.revise(request));
+            }
+
+            // 执行Pipeline
+            pipeline.execute();
+
+            // 验证结果
+            for (int i = 0; i < futures.size(); i++) {
+                try {
+                    ItemRevision result = futures.get(i).get();
+                    assertNotNull(result);
+                    assertEquals("B", result.getRevId());
+                    assertEquals("Pipeline更新-" + i + "-" + dateCode, result.getName());
+                    log.info("对象 {} 修订后名称: {}", result.getCode(), result.getName());
+                } catch (Exception e) {
+                    throw new RuntimeException("验证Pipeline修订结果失败", e);
+                }
+            }
+
+            log.info("✅ Pipeline修订更新属性测试通过: {} 个对象", futures.size());
+        });
+
+        // 清理测试数据
+        List<Long> allIds = new ArrayList<>();
+        allIds.addAll(savedObjects.stream().map(ModelObject::getId).collect(Collectors.toList()));
         objectService.forceDelete(allIds);
     }
 

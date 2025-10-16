@@ -20,9 +20,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -78,6 +81,16 @@ public class RelationAndReviseTest {
         S.withStrongConsistency(() -> {
             TimerUtils.measureExecutionTime("升版后的关系处理", () -> {
                 revise(testData);
+            });
+        });
+    }
+
+    @Test
+    @Order(5)
+    public void testReviseWithProperties() {
+        S.withStrongConsistency(() -> {
+            TimerUtils.measureExecutionTime("修订时更新属性", () -> {
+                reviseWithProperties(testData);
             });
         });
     }
@@ -172,5 +185,68 @@ public class RelationAndReviseTest {
         Assertion.assertEquals("C", revisedPrimary.getRevId());
         Assertion.assertEquals(3, primary.rel().size());
         Assertion.assertEquals(0, revisedPrimary.rel().size());
+    }
+
+    private void reviseWithProperties(List<ItemRevision> data) {
+        // 准备测试对象
+        ItemRevision testItem = data.get(10);
+        S.service(LifecycleService.class).moveToState(testItem, LifecycleState.STATE_RELEASED);
+        testItem.reload();
+
+        String originalName = testItem.getName();
+        log.info("原始名称: {}", originalName);
+
+        // 测试单个修订并更新属性
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("name", "修订后的新名称-" + dateCode);
+        
+        RevisionService.ReviseRequest<ItemRevision> request = new RevisionService.ReviseRequest<>(
+                testItem, CopyRule.NoCopy, properties);
+        
+        ItemRevision revisedItem = S.service(RevisionService.class).revise(request);
+        Assertion.assertEquals("B", revisedItem.getRevId());
+        Assertion.assertEquals("修订后的新名称-" + dateCode, revisedItem.getName());
+        log.info("修订后名称: {}", revisedItem.getName());
+
+        // 测试批量修订并更新属性（统一属性）
+        List<ItemRevision> batchItems = List.of(data.get(11), data.get(12), data.get(13));
+        S.service(LifecycleService.class).moveToState(batchItems, LifecycleState.STATE_RELEASED);
+        batchItems.forEach(ModelObject::reload);
+
+        Map<String, Object> batchProperties = new HashMap<>();
+        batchProperties.put("name", "批量修订后的名称-" + dateCode);
+        
+        List<RevisionService.ReviseRequest<ItemRevision>> batchRequests = batchItems.stream()
+                .map(item -> new RevisionService.ReviseRequest<>(item, CopyRule.NoCopy, batchProperties))
+                .collect(Collectors.toList());
+        
+        List<ItemRevision> revisedItems = S.service(RevisionService.class).revise(batchRequests);
+        Assertion.assertEquals(3, revisedItems.size());
+        for (ItemRevision item : revisedItems) {
+            Assertion.assertEquals("B", item.getRevId());
+            Assertion.assertEquals("批量修订后的名称-" + dateCode, item.getName());
+            log.info("批量修订后对象 {} 的名称: {}", item.getCode(), item.getName());
+        }
+
+        // 测试批量修订并更新属性（每个对象不同属性）
+        List<ItemRevision> individualItems = List.of(data.get(14), data.get(15), data.get(16));
+        S.service(LifecycleService.class).moveToState(individualItems, LifecycleState.STATE_RELEASED);
+        individualItems.forEach(ModelObject::reload);
+
+        List<RevisionService.ReviseRequest<ItemRevision>> individualRequests = new ArrayList<>();
+        for (int i = 0; i < individualItems.size(); i++) {
+            Map<String, Object> props = new HashMap<>();
+            props.put("name", "独立修订-" + i + "-" + dateCode);
+            individualRequests.add(new RevisionService.ReviseRequest<>(individualItems.get(i), CopyRule.NoCopy, props));
+        }
+        
+        List<ItemRevision> individualRevisedItems = S.service(RevisionService.class).revise(individualRequests);
+        Assertion.assertEquals(3, individualRevisedItems.size());
+        for (int i = 0; i < individualRevisedItems.size(); i++) {
+            ItemRevision item = individualRevisedItems.get(i);
+            Assertion.assertEquals("B", item.getRevId());
+            Assertion.assertEquals("独立修订-" + i + "-" + dateCode, item.getName());
+            log.info("独立修订后对象 {} 的名称: {}", item.getCode(), item.getName());
+        }
     }
 }

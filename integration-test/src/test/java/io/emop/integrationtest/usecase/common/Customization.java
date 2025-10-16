@@ -5,17 +5,22 @@ import io.emop.integrationtest.domain.UserLocationEntity;
 import io.emop.integrationtest.util.TimerUtils;
 import io.emop.model.cad.CADComponent;
 import io.emop.model.common.CheckoutInfo;
+import io.emop.model.common.CopyRule;
 import io.emop.model.common.ItemRevision;
 import io.emop.model.common.ModelObject;
 import io.emop.model.common.ObjectRef;
+import io.emop.model.common.Revisionable;
 import io.emop.model.common.Revisionable.CriteriaByCodeAndRevId;
+import io.emop.model.lifecycle.LifecycleState;
 import io.emop.model.common.UserContext;
 import io.emop.model.query.Q;
 import io.emop.service.S;
 import io.emop.service.api.data.NativeSqlService;
 import io.emop.service.api.data.ObjectService;
 import io.emop.service.api.domain.common.RevisionService;
+import io.emop.service.api.domain.common.RevisionService.ReviseRequest;
 import io.emop.service.api.dsl.DSLExecutionService;
+import io.emop.service.api.lifecycle.LifecycleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
@@ -535,9 +540,24 @@ public class Customization {
             Map<String, Object> fastFinalCidProps = fastUpdatedObject.get("cidProps", Map.class);
             assertEquals("active", fastFinalCidProps.get("status"));
             assertNotNull(fastFinalCidProps.get("lastModified"));
-
             log.info("FastUpdate 验证通过:");
             log.info("  - cidProps 快速更新后: {}", fastFinalCidProps);
+
+            // 8. 带属性修订
+            Revisionable releasedObject = (Revisionable) S.service(LifecycleService.class).moveToState(fastUpdatedObject, LifecycleState.STATE_RELEASED);
+            Revisionable revisedObject = S.service(RevisionService.class).reviseByRequest(new ReviseRequest(
+                                releasedObject,
+                                CopyRule.NoCopy,
+                                Map.of("cidProps", Map.of("revisionReason", "Routine update"), "name", "updated")));
+            assertEquals("updated", revisedObject.get("name"));
+            // 5.1 确认数据库是JSONB格式而不是简单的字符串
+            result = S.service(NativeSqlService.class).executeNativeQuery(
+                                "select cidprops->'revisionReason' as revisionReason from sample.cad_component_embedding_complex_object where id=?",
+                                revisedObject.getId());
+            assertEquals("\"Routine update\"", result.get(0).get(0));
+            log.info("Revise 验证通过:");
+            log.info("  - name 修订后: {}", (String) revisedObject.get("name"));
+            
 
             log.info("=== Object 类型 JSON 序列化测试全部通过 ===");
         });
