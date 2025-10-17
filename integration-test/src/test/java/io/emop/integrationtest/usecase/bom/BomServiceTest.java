@@ -4,8 +4,10 @@ import io.emop.integrationtest.util.TimerUtils;
 import io.emop.model.bom.BomLine;
 import io.emop.model.common.ItemRevision;
 import io.emop.model.common.ModelObject;
+import io.emop.model.common.RevisionRule;
 import io.emop.model.common.Revisionable;
 import io.emop.model.common.UserContext;
+import io.emop.model.query.Q;
 import io.emop.model.query.tuple.Tuple2;
 import io.emop.model.query.tuple.Tuple3;
 import io.emop.service.S;
@@ -119,6 +121,14 @@ public class BomServiceTest {
             log.info("✅ 添加 BOM 行成功: ID={}", bomLine.getId());
         });
 
+        // 从新获取 parent，验证子项
+        BomLine parentBL = Q.result(BomLine.class).where("targetItemCode = ? and targetRevId = ?", parent.getCode(), parent.getRevId()).first();
+        List<BomLine> childrenBLs = parentBL.get("children");
+        assertNotNull(childrenBLs);
+        assertEquals(1, childrenBLs.size());
+        assertEquals(childF.getCode(), childrenBLs.get(0).getTargetCode());
+        assertEquals(childF.getId(), childrenBLs.get(0).resolveTarget(RevisionRule.PRECISE).getId());
+
         // 清理
         cleanupTestData(parent, List.of(child));
     }
@@ -192,7 +202,7 @@ public class BomServiceTest {
             updates.put("description", "更新后的描述");
             updates.put("customField", "新增扩展字段");
 
-            BomLine updated = bomService.updateBomLine(parent, child, updates);
+            BomLine updated = bomService.updateBomLine(parentF, childF, updates);
 
             assertNotNull(updated);
             assertEquals(5.0f, updated.getQuantity());
@@ -223,11 +233,11 @@ public class BomServiceTest {
 
         final ItemRevision grandparentF = objectService.save(grandparent);
         final ItemRevision parentF = objectService.save(parent);
-        child = objectService.save(child);
+        final ItemRevision childF = objectService.save(child);
 
         // 构建层级关系
-        BomLine parentLine = bomService.addBomLine(grandparent, parent, Map.of("quantity", 1.0f));
-        BomLine childLine = bomService.addBomLine(parent, child, Map.of("quantity", 1.0f));
+        BomLine parentLine = bomService.addBomLine(grandparentF, parentF, Map.of("quantity", 1.0f));
+        BomLine childLine = bomService.addBomLine(parentF, childF, Map.of("quantity", 1.0f));
 
         TimerUtils.measureExecutionTime("级联删除 BOM 行", () -> {
             // 级联删除 parent，应该同时删除 child
@@ -268,12 +278,12 @@ public class BomServiceTest {
         final ItemRevision childF = objectService.save(child);
 
         // 构建层级关系
-        BomLine parentLine = bomService.addBomLine(grandparent, parent, Map.of("quantity", 1.0f));
+        BomLine parentLine = bomService.addBomLine(grandparentF, parentF, Map.of("quantity", 1.0f));
         BomLine childLine = bomService.addBomLine(parentF, childF, Map.of("quantity", 1.0f));
 
         TimerUtils.measureExecutionTime("非级联删除 BOM 行", () -> {
             // 非级联删除 parent，child 应该上移到 grandparent 下
-            boolean result = bomService.deleteBomLine(grandparent, parent, false);
+            boolean result = bomService.deleteBomLine(grandparentF, parentF, false);
 
             assertTrue(result);
 
@@ -311,8 +321,8 @@ public class BomServiceTest {
         final ItemRevision childF = objectService.save(child);
 
         // child 初始在 parent1 下
-        BomLine childLine = bomService.addBomLine(parent1, child, Map.of("quantity", 1.0f));
-        bomService.addBomLine(parent1, parent2, Map.of("quantity", 1.0f)); // parent2 也在 parent1 下
+        BomLine childLine = bomService.addBomLine(parent1F, childF, Map.of("quantity", 1.0f));
+        bomService.addBomLine(parent1F, parent2F, Map.of("quantity", 1.0f)); // parent2 也在 parent1 下
 
         TimerUtils.measureExecutionTime("移动 BOM 行", () -> {
             // 将 child 从 parent1 移动到 parent2 下
@@ -324,7 +334,7 @@ public class BomServiceTest {
             // 验证新的父节点
             BomLine movedCheck = objectService.findById(moved.getId());
             assertNotNull(movedCheck);
-            assertNotNull(movedCheck.getParent());
+            assertNotNull(movedCheck.get("parent"));
 
             log.info("✅ 移动 BOM 行成功");
         });
@@ -432,9 +442,8 @@ public class BomServiceTest {
      */
     private ItemRevision createTestItem(String prefix) {
         ItemRevision rev = ItemRevision.newModel(
-                prefix + "-" + dateCode + "-" + UUID.randomUUID().toString().substring(0, 8),
-                revId
-        );
+                prefix + "-" + dateCode,
+                revId);
         rev.setName("BOM测试对象-" + prefix);
         return rev;
     }
