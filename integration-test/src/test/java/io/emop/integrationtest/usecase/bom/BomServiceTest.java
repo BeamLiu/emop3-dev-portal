@@ -88,6 +88,18 @@ public class BomServiceTest {
         S.withStrongConsistency(this::testBatchDeleteBomLinesImpl);
     }
 
+    @Test
+    @Order(9)
+    public void testGetChildrenByRevisionRule() {
+        S.withStrongConsistency(this::testGetChildrenByRevisionRuleImpl);
+    }
+
+    @Test
+    @Order(10)
+    public void testGetParentsByRevisionRule() {
+        S.withStrongConsistency(this::testGetParentsByRevisionRuleImpl);
+    }
+
     /**
      * 测试添加单个 BOM 行
      */
@@ -446,6 +458,104 @@ public class BomServiceTest {
                 revId);
         rev.setName("BOM测试对象-" + prefix);
         return rev;
+    }
+
+    /**
+     * 测试根据父级和RevisionRule获取所有子级
+     */
+    private void testGetChildrenByRevisionRuleImpl() {
+        log.info("=== 测试根据父级和RevisionRule获取所有子级 ===");
+
+        ObjectService objectService = S.service(ObjectService.class);
+        BomService bomService = S.service(BomService.class);
+
+        // 创建测试数据：parent -> child1, child2, child3
+        ItemRevision parent = createTestItem("children-parent");
+        List<ItemRevision> children = new ArrayList<>();
+        for (int i = 1; i <= 3; i++) {
+            children.add(createTestItem("children-child-" + i));
+        }
+
+        parent = objectService.save(parent);
+        List<ItemRevision> updatedChildren = objectService.saveAll(children);
+
+        // 添加BOM关系
+        for (ItemRevision child : updatedChildren) {
+            bomService.addBomLine(parent, child, Map.of("quantity", 1.0f));
+        }
+
+        final ItemRevision finalParent = parent;
+
+        TimerUtils.measureExecutionTime("获取所有子级Revisionable", () -> {
+            List<Revisionable> childRevisionables = bomService.getChildrenByRevisionRule(finalParent, RevisionRule.PRECISE);
+
+            assertNotNull(childRevisionables);
+            assertEquals(3, childRevisionables.size());
+
+            // 验证返回的子级是否正确
+            Set<Long> childIds = childRevisionables.stream()
+                    .map(ModelObject::getId)
+                    .collect(Collectors.toSet());
+
+            for (ItemRevision child : updatedChildren) {
+                assertTrue(childIds.contains(child.getId()), 
+                    "子级列表应包含 child ID: " + child.getId());
+            }
+
+            log.info("✅ 获取到 {} 个子级Revisionable", childRevisionables.size());
+        });
+
+        // 清理
+        cleanupTestData(finalParent, updatedChildren);
+    }
+
+    /**
+     * 测试根据子级和RevisionRule获取所有父级
+     */
+    private void testGetParentsByRevisionRuleImpl() {
+        log.info("=== 测试根据子级和RevisionRule获取所有父级 ===");
+
+        ObjectService objectService = S.service(ObjectService.class);
+        BomService bomService = S.service(BomService.class);
+
+        // 创建测试数据：parent1 -> child, parent2 -> child, parent3 -> child
+        ItemRevision child = createTestItem("parents-child");
+        List<ItemRevision> parents = new ArrayList<>();
+        for (int i = 1; i <= 3; i++) {
+            parents.add(createTestItem("parents-parent-" + i));
+        }
+
+        child = objectService.save(child);
+        List<ItemRevision> updatedParents = objectService.saveAll(parents);
+
+        // 添加BOM关系（同一个子件被多个父件引用）
+        for (ItemRevision parent : updatedParents) {
+            bomService.addBomLine(parent, child, Map.of("quantity", 1.0f));
+        }
+
+        final ItemRevision finalChild = child;
+
+        TimerUtils.measureExecutionTime("获取所有父级Revisionable", () -> {
+            List<Revisionable> parentRevisionables = bomService.getParentsByRevisionRule(finalChild, RevisionRule.PRECISE);
+
+            assertNotNull(parentRevisionables);
+            assertEquals(3, parentRevisionables.size());
+
+            // 验证返回的父级是否正确
+            Set<Long> parentIds = parentRevisionables.stream()
+                    .map(ModelObject::getId)
+                    .collect(Collectors.toSet());
+
+            for (ItemRevision parent : updatedParents) {
+                assertTrue(parentIds.contains(parent.getId()), 
+                    "父级列表应包含 parent ID: " + parent.getId());
+            }
+
+            log.info("✅ 获取到 {} 个父级Revisionable", parentRevisionables.size());
+        });
+
+        // 清理（注意：这里child是主要对象，parents是关联对象）
+        cleanupTestData(child, updatedParents);
     }
 
     /**

@@ -203,7 +203,7 @@ public class RelationAndReviseTest {
         RevisionService.ReviseRequest<ItemRevision> request = new RevisionService.ReviseRequest<>(
                 testItem, CopyRule.NoCopy, properties);
         
-        ItemRevision revisedItem = S.service(RevisionService.class).revise(request);
+        ItemRevision revisedItem = S.service(RevisionService.class).reviseByRequest(request);
         Assertion.assertEquals("B", revisedItem.getRevId());
         Assertion.assertEquals("修订后的新名称-" + dateCode, revisedItem.getName());
         log.info("修订后名称: {}", revisedItem.getName());
@@ -220,7 +220,7 @@ public class RelationAndReviseTest {
                 .map(item -> new RevisionService.ReviseRequest<>(item, CopyRule.NoCopy, batchProperties))
                 .collect(Collectors.toList());
         
-        List<ItemRevision> revisedItems = S.service(RevisionService.class).revise(batchRequests);
+        List<ItemRevision> revisedItems = S.service(RevisionService.class).reviseByRequests(batchRequests);
         Assertion.assertEquals(3, revisedItems.size());
         for (ItemRevision item : revisedItems) {
             Assertion.assertEquals("B", item.getRevId());
@@ -240,7 +240,7 @@ public class RelationAndReviseTest {
             individualRequests.add(new RevisionService.ReviseRequest<>(individualItems.get(i), CopyRule.NoCopy, props));
         }
         
-        List<ItemRevision> individualRevisedItems = S.service(RevisionService.class).revise(individualRequests);
+        List<ItemRevision> individualRevisedItems = S.service(RevisionService.class).reviseByRequests(individualRequests);
         Assertion.assertEquals(3, individualRevisedItems.size());
         for (int i = 0; i < individualRevisedItems.size(); i++) {
             ItemRevision item = individualRevisedItems.get(i);

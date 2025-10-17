@@ -564,7 +564,7 @@ public class PipelineRevisionTest {
             RevisionService.ReviseRequest<ItemRevision> request = new RevisionService.ReviseRequest<>(
                     firstObj, CopyRule.NoCopy, properties);
             
-            ItemRevision revisedObj = revisionService.revise(request);
+            ItemRevision revisedObj = revisionService.reviseByRequest(request);
             
             assertNotNull(revisedObj);
             assertEquals("B", revisedObj.getRevId());
@@ -582,7 +582,7 @@ public class PipelineRevisionTest {
                     .map(obj -> new RevisionService.ReviseRequest<>(obj, CopyRule.NoCopy, batchProperties))
                     .collect(Collectors.toList());
             
-            List<ItemRevision> revisedBatch = revisionService.revise(batchRequests);
+            List<ItemRevision> revisedBatch = revisionService.reviseByRequests(batchRequests);
             
             assertEquals(3, revisedBatch.size());
             for (ItemRevision item : revisedBatch) {
@@ -601,7 +601,7 @@ public class PipelineRevisionTest {
                 individualRequests.add(new RevisionService.ReviseRequest<>(individualObjects.get(i), CopyRule.NoCopy, props));
             }
             
-            List<ItemRevision> individualRevised = revisionService.revise(individualRequests);
+            List<ItemRevision> individualRevised = revisionService.reviseByRequests(individualRequests);
             
             assertEquals(3, individualRevised.size());
             for (int i = 0; i < individualRevised.size(); i++) {
