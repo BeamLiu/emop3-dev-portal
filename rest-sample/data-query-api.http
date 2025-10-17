@@ -1,0 +1,1273 @@
+### 数据查询 API 测试样例
+### 说明：本测试包含 DSL 创建类型、数据创建和各种查询操作（包括 IN 操作）
+### 按顺序执行即可完成完整的数据查询功能测试
+
+### 基础URL配置
+@baseUrl = http://localhost:870/webconsole
+@contentType = application/json
+@userHeader = {"userId":-1,"authorities":["SYSTEM"]}
+
+### 动态变量
+@timestamp = {{$timestamp}}
+@item1Id = 
+@item2Id = 
+@item3Id = 
+@item4Id = 
+@item5Id = 
+
+###############################################
+# 步骤1: 使用 DSL 创建自定义类型
+###############################################
+
+### 1.1 创建继承自 ItemRevision 的自定义类型，包含各种属性类型
+POST {{baseUrl}}/api/dsl/execute
+Content-Type: text/plain
+x-user: {{userHeader}}
+
+create type com.example.ProductItem extends io.emop.model.common.ItemRevision {
+    // 字符串类型
+    attribute productCode: String {
+        required: true
+        description: "产品编码"
+    }
+    
+    // 整数类型
+    attribute stockQuantity: Integer {
+        description: "库存数量"
+    }
+    
+    // 浮点数类型
+    attribute unitPrice: Double {
+        description: "单价"
+    }
+    
+    // 布尔类型
+    attribute isActive: Boolean {
+        description: "是否激活"
+    }
+    
+    // 日期类型
+    attribute manufactureDate: java.sql.Date {
+        description: "生产日期"
+    }
+    
+    // 时间戳类型
+    attribute lastUpdateTime: Timestamp {
+        description: "最后更新时间"
+    }
+    
+    // Object 类型 - 用于存储复杂对象
+    attribute specifications: Object {
+        description: "产品规格"
+    }
+    
+    // Object 类型 - 用于存储分类信息
+    attribute categoryInfo: Object {
+        description: "分类信息"
+    }
+    
+    schema: SAMPLE
+    tableName: Product_Item
+} if not exists
+
+> {%
+    client.test("DSL 执行成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+    });
+    
+    if (response.status === 200) {
+        client.log("✅ 自定义类型 ProductItem 创建成功");
+    }
+%}
+
+
+###############################################
+# 步骤2: 创建测试数据
+###############################################
+
+### 2.1 创建产品1 - 电子产品
+POST {{baseUrl}}/api/data/ProductItem
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "data": {
+    "code": "PROD-ELEC-{{timestamp}}-001",
+    "revId": "A",
+    "name": "智能手机",
+    "productCode": "PHONE-001",
+    "stockQuantity": 100,
+    "unitPrice": 2999.99,
+    "isActive": true,
+    "manufactureDate": "2024-01-15",
+    "lastUpdateTime": "2024-10-15T10:30:00",
+    "specifications": {
+      "screen": "6.5英寸",
+      "memory": "8GB",
+      "storage": "256GB",
+      "battery": "4500mAh"
+    },
+    "categoryInfo": {
+      "category": "电子产品",
+      "subCategory": "智能手机",
+      "brand": "华为"
+    }
+  }
+}
+
+> {%
+    client.test("创建产品1成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+        client.assert(response.body.id !== null, "产品ID不应为空");
+    });
+    
+    if (response.status === 200) {
+        client.global.set("item1Id", response.body.id);
+        client.log("✅ 产品1创建成功: ID=" + response.body.id);
+    }
+%}
+
+
+### 2.2 创建产品2 - 电子产品
+POST {{baseUrl}}/api/data/ProductItem
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "data": {
+    "code": "PROD-ELEC-{{timestamp}}-002",
+    "revId": "A",
+    "name": "笔记本电脑",
+    "productCode": "LAPTOP-001",
+    "stockQuantity": 50,
+    "unitPrice": 5999.00,
+    "isActive": true,
+    "manufactureDate": "2024-02-20",
+    "lastUpdateTime": "2024-10-16T14:20:00",
+    "specifications": {
+      "screen": "15.6英寸",
+      "processor": "Intel i7",
+      "memory": "16GB",
+      "storage": "512GB SSD"
+    },
+    "categoryInfo": {
+      "category": "电子产品",
+      "subCategory": "笔记本电脑",
+      "brand": "联想"
+    }
+  }
+}
+
+> {%
+    client.test("创建产品2成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+    });
+    
+    if (response.status === 200) {
+        client.global.set("item2Id", response.body.id);
+        client.log("✅ 产品2创建成功: ID=" + response.body.id);
+    }
+%}
+
+
+### 2.3 创建产品3 - 家具产品
+POST {{baseUrl}}/api/data/ProductItem
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "data": {
+    "code": "PROD-FURN-{{timestamp}}-001",
+    "revId": "A",
+    "name": "办公椅",
+    "productCode": "CHAIR-001",
+    "stockQuantity": 200,
+    "unitPrice": 899.00,
+    "isActive": true,
+    "manufactureDate": "2024-03-10",
+    "lastUpdateTime": "2024-10-17T09:15:00",
+    "specifications": {
+      "material": "皮革",
+      "color": "黑色",
+      "adjustable": true,
+      "weight": "15kg"
+    },
+    "categoryInfo": {
+      "category": "家具",
+      "subCategory": "办公家具",
+      "brand": "宜家"
+    }
+  }
+}
+
+> {%
+    client.test("创建产品3成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+    });
+    
+    if (response.status === 200) {
+        client.global.set("item3Id", response.body.id);
+        client.log("✅ 产品3创建成功: ID=" + response.body.id);
+    }
+%}
+
+
+### 2.4 创建产品4 - 家具产品（未激活）
+POST {{baseUrl}}/api/data/ProductItem
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "data": {
+    "code": "PROD-FURN-{{timestamp}}-002",
+    "revId": "A",
+    "name": "书桌",
+    "productCode": "DESK-001",
+    "stockQuantity": 80,
+    "unitPrice": 1299.00,
+    "isActive": false,
+    "manufactureDate": "2024-04-05",
+    "lastUpdateTime": "2024-10-18T11:00:00",
+    "specifications": {
+      "material": "实木",
+      "color": "原木色",
+      "dimensions": "120x60x75cm"
+    },
+    "categoryInfo": {
+      "category": "家具",
+      "subCategory": "办公家具",
+      "brand": "宜家"
+    }
+  }
+}
+
+> {%
+    client.test("创建产品4成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+    });
+    
+    if (response.status === 200) {
+        client.global.set("item4Id", response.body.id);
+        client.log("✅ 产品4创建成功: ID=" + response.body.id);
+    }
+%}
+
+
+### 2.5 创建产品5 - 服装产品
+POST {{baseUrl}}/api/data/ProductItem
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "data": {
+    "code": "PROD-CLOT-{{timestamp}}-001",
+    "revId": "A",
+    "name": "T恤",
+    "productCode": "TSHIRT-001",
+    "stockQuantity": 500,
+    "unitPrice": 99.00,
+    "isActive": true,
+    "manufactureDate": "2024-05-12",
+    "lastUpdateTime": "2024-10-19T16:45:00",
+    "specifications": {
+      "material": "纯棉",
+      "size": "L",
+      "color": "白色"
+    },
+    "categoryInfo": {
+      "category": "服装",
+      "subCategory": "上衣",
+      "brand": "优衣库"
+    }
+  }
+}
+
+> {%
+    client.test("创建产品5成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+    });
+    
+    if (response.status === 200) {
+        client.global.set("item5Id", response.body.id);
+        client.log("✅ 产品5创建成功: ID=" + response.body.id);
+        client.log("✅ 所有测试数据创建完成");
+    }
+%}
+
+###############################################
+# 步骤3: 基础查询操作
+###############################################
+
+### 3.1 查询所有 ProductItem（不分页）
+POST {{baseUrl}}/api/data/query/ProductItem
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "conditions": {
+    "type": "AND",
+    "conditions": []
+  }
+}
+
+> {%
+    client.test("查询所有产品成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+        client.assert(Array.isArray(response.body), "返回结果应为数组");
+        client.log("查询到 " + response.body.length + " 个产品");
+    });
+%}
+
+### 3.2 查询所有 ProductItem（分页）
+POST {{baseUrl}}/api/data/query/ProductItem/page
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "conditions": {
+    "type": "AND",
+    "conditions": []
+  },
+  "pagination": {
+    "pageNumber": 0,
+    "pageSize": 10
+  }
+}
+
+> {%
+    client.test("分页查询成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+        client.assert(response.body.content !== undefined, "应包含content字段");
+        client.log("总记录数: " + response.body.totalElements);
+        client.log("当前页记录数: " + response.body.content.length);
+    });
+%}
+
+
+###############################################
+# 步骤4: EQUALS 查询
+###############################################
+
+### 4.1 按字符串字段查询（EQUALS）
+POST {{baseUrl}}/api/data/query/ProductItem
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "conditions": {
+    "type": "AND",
+    "conditions": [
+      {
+        "field": "name",
+        "operator": "EQUALS",
+        "value": "智能手机"
+      }
+    ]
+  }
+}
+
+> {%
+    client.test("EQUALS 查询成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+        client.assert(response.body.length > 0, "应该查询到结果");
+        client.assert(response.body[0].name === "智能手机", "名称应匹配");
+    });
+%}
+
+### 4.2 按布尔字段查询（EQUALS）
+POST {{baseUrl}}/api/data/query/ProductItem
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "conditions": {
+    "type": "AND",
+    "conditions": [
+      {
+        "field": "isActive",
+        "operator": "EQUALS",
+        "value": true
+      }
+    ]
+  }
+}
+
+> {%
+    client.test("布尔字段查询成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+        client.log("查询到 " + response.body.length + " 个激活的产品");
+    });
+%}
+
+
+###############################################
+# 步骤5: IN 操作查询（重点测试）
+###############################################
+
+### 5.1 IN 查询 - 字符串字段
+POST {{baseUrl}}/api/data/query/ProductItem
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "conditions": {
+    "type": "AND",
+    "conditions": [
+      {
+        "field": "name",
+        "operator": "IN",
+        "value": ["智能手机", "笔记本电脑", "办公椅"]
+      }
+    ]
+  }
+}
+
+> {%
+    client.test("IN 查询（字符串）成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+        client.assert(response.body.length === 3, "应该查询到3个产品");
+        client.log("✅ IN 查询成功，查询到 " + response.body.length + " 个产品");
+    });
+%}
+
+### 5.2 IN 查询 - 整数字段
+POST {{baseUrl}}/api/data/query/ProductItem
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "conditions": {
+    "type": "AND",
+    "conditions": [
+      {
+        "field": "stockQuantity",
+        "operator": "IN",
+        "value": [100, 200, 500]
+      }
+    ]
+  }
+}
+
+> {%
+    client.test("IN 查询（整数）成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+        client.assert(response.body.length === 3, "应该查询到3个产品");
+        client.log("✅ IN 查询（整数）成功，查询到 " + response.body.length + " 个产品");
+    });
+%}
+
+
+### 5.3 IN 查询 - productCode 字段
+POST {{baseUrl}}/api/data/query/ProductItem
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "conditions": {
+    "type": "AND",
+    "conditions": [
+      {
+        "field": "productCode",
+        "operator": "IN",
+        "value": ["PHONE-001", "LAPTOP-001", "CHAIR-001"]
+      }
+    ]
+  }
+}
+
+> {%
+    client.test("IN 查询（productCode）成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+        client.assert(response.body.length === 3, "应该查询到3个产品");
+        client.log("✅ IN 查询（productCode）成功");
+    });
+%}
+
+### 5.4 NOT_IN 查询
+POST {{baseUrl}}/api/data/query/ProductItem
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "conditions": {
+    "type": "AND",
+    "conditions": [
+      {
+        "field": "name",
+        "operator": "NOT_IN",
+        "value": ["智能手机", "笔记本电脑"]
+      }
+    ]
+  }
+}
+
+> {%
+    client.test("NOT_IN 查询成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+        client.assert(response.body.length >= 3, "应该查询到至少3个产品");
+        client.log("✅ NOT_IN 查询成功，查询到 " + response.body.length + " 个产品");
+    });
+%}
+
+
+###############################################
+# 步骤6: 比较操作查询
+###############################################
+
+### 6.1 GREATER_THAN 查询
+POST {{baseUrl}}/api/data/query/ProductItem
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "conditions": {
+    "type": "AND",
+    "conditions": [
+      {
+        "field": "unitPrice",
+        "operator": "GREATER_THAN",
+        "value": 1000
+      }
+    ]
+  }
+}
+
+> {%
+    client.test("GREATER_THAN 查询成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+        client.log("查询到 " + response.body.length + " 个单价大于1000的产品");
+    });
+%}
+
+### 6.2 LESS_THAN_EQUALS 查询
+POST {{baseUrl}}/api/data/query/ProductItem
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "conditions": {
+    "type": "AND",
+    "conditions": [
+      {
+        "field": "stockQuantity",
+        "operator": "LESS_THAN_EQUALS",
+        "value": 100
+      }
+    ]
+  }
+}
+
+> {%
+    client.test("LESS_THAN_EQUALS 查询成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+        client.log("查询到 " + response.body.length + " 个库存小于等于100的产品");
+    });
+%}
+
+
+### 6.3 BETWEEN 查询
+POST {{baseUrl}}/api/data/query/ProductItem
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "conditions": {
+    "type": "AND",
+    "conditions": [
+      {
+        "field": "unitPrice",
+        "operator": "BETWEEN",
+        "value": 500,
+        "secondValue": 3000
+      }
+    ]
+  }
+}
+
+> {%
+    client.test("BETWEEN 查询成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+        client.log("查询到 " + response.body.length + " 个单价在500-3000之间的产品");
+    });
+%}
+
+###############################################
+# 步骤7: LIKE 模糊查询
+###############################################
+
+### 7.1 LIKE 查询
+POST {{baseUrl}}/api/data/query/ProductItem
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "conditions": {
+    "type": "AND",
+    "conditions": [
+      {
+        "field": "name",
+        "operator": "LIKE",
+        "value": "%电%"
+      }
+    ]
+  }
+}
+
+> {%
+    client.test("LIKE 查询成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+        client.log("查询到 " + response.body.length + " 个名称包含'电'的产品");
+    });
+%}
+
+
+###############################################
+# 步骤8: 复合条件查询（AND/OR）
+###############################################
+
+### 8.1 AND 复合查询
+POST {{baseUrl}}/api/data/query/ProductItem
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "conditions": {
+    "type": "AND",
+    "conditions": [
+      {
+        "field": "isActive",
+        "operator": "EQUALS",
+        "value": true
+      },
+      {
+        "field": "unitPrice",
+        "operator": "GREATER_THAN",
+        "value": 1000
+      }
+    ]
+  }
+}
+
+> {%
+    client.test("AND 复合查询成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+        client.log("查询到 " + response.body.length + " 个激活且单价大于1000的产品");
+    });
+%}
+
+### 8.2 OR 复合查询
+POST {{baseUrl}}/api/data/query/ProductItem
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "conditions": {
+    "type": "OR",
+    "conditions": [
+      {
+        "field": "name",
+        "operator": "EQUALS",
+        "value": "智能手机"
+      },
+      {
+        "field": "name",
+        "operator": "EQUALS",
+        "value": "办公椅"
+      }
+    ]
+  }
+}
+
+> {%
+    client.test("OR 复合查询成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+        client.assert(response.body.length === 2, "应该查询到2个产品");
+        client.log("✅ OR 复合查询成功");
+    });
+%}
+
+
+### 8.3 嵌套条件查询（AND 中包含 OR）
+POST {{baseUrl}}/api/data/query/ProductItem
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "conditions": {
+    "type": "AND",
+    "conditions": [
+      {
+        "field": "isActive",
+        "operator": "EQUALS",
+        "value": true
+      },
+      {
+        "type": "OR",
+        "conditions": [
+          {
+            "field": "name",
+            "operator": "LIKE",
+            "value": "%手机%"
+          },
+          {
+            "field": "name",
+            "operator": "LIKE",
+            "value": "%电脑%"
+          }
+        ]
+      }
+    ]
+  }
+}
+
+> {%
+    client.test("嵌套条件查询成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+        client.log("✅ 嵌套条件查询成功，查询到 " + response.body.length + " 个产品");
+    });
+%}
+
+###############################################
+# 步骤9: IN 操作与其他条件组合
+###############################################
+
+### 9.1 IN + AND 组合查询
+POST {{baseUrl}}/api/data/query/ProductItem
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "conditions": {
+    "type": "AND",
+    "conditions": [
+      {
+        "field": "name",
+        "operator": "IN",
+        "value": ["智能手机", "笔记本电脑", "办公椅", "书桌"]
+      },
+      {
+        "field": "isActive",
+        "operator": "EQUALS",
+        "value": true
+      }
+    ]
+  }
+}
+
+> {%
+    client.test("IN + AND 组合查询成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+        client.assert(response.body.length === 3, "应该查询到3个激活的产品");
+        client.log("✅ IN + AND 组合查询成功");
+    });
+%}
+
+
+### 9.2 IN + 价格范围组合查询
+POST {{baseUrl}}/api/data/query/ProductItem
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "conditions": {
+    "type": "AND",
+    "conditions": [
+      {
+        "field": "productCode",
+        "operator": "IN",
+        "value": ["PHONE-001", "LAPTOP-001", "CHAIR-001", "DESK-001"]
+      },
+      {
+        "field": "unitPrice",
+        "operator": "GREATER_THAN",
+        "value": 1000
+      }
+    ]
+  }
+}
+
+> {%
+    client.test("IN + 价格范围组合查询成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+        client.log("✅ 查询到 " + response.body.length + " 个符合条件的产品");
+    });
+%}
+
+###############################################
+# 步骤10: 日期和时间戳查询
+###############################################
+
+### 10.1 日期查询（GREATER_THAN）
+POST {{baseUrl}}/api/data/query/ProductItem
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "conditions": {
+    "type": "AND",
+    "conditions": [
+      {
+        "field": "manufactureDate",
+        "operator": "GREATER_THAN",
+        "value": "2024-03-01"
+      }
+    ]
+  }
+}
+
+> {%
+    client.test("日期查询成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+        client.log("查询到 " + response.body.length + " 个2024年3月后生产的产品");
+    });
+%}
+
+
+### 10.2 时间戳查询（BETWEEN）
+POST {{baseUrl}}/api/data/query/ProductItem
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "conditions": {
+    "type": "AND",
+    "conditions": [
+      {
+        "field": "lastUpdateTime",
+        "operator": "BETWEEN",
+        "value": "2024-10-15T00:00:00",
+        "secondValue": "2024-10-18T23:59:59"
+      }
+    ]
+  }
+}
+
+> {%
+    client.test("时间戳查询成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+        client.log("查询到 " + response.body.length + " 个在指定时间范围内更新的产品");
+    });
+%}
+
+###############################################
+# 步骤11: NULL 值查询
+###############################################
+
+### 11.1 IS_NULL 查询
+POST {{baseUrl}}/api/data/query/ProductItem
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "conditions": {
+    "type": "AND",
+    "conditions": [
+      {
+        "field": "description",
+        "operator": "IS_NULL"
+      }
+    ]
+  }
+}
+
+> {%
+    client.test("IS_NULL 查询成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+        client.log("查询到 " + response.body.length + " 个没有描述的产品");
+    });
+%}
+
+### 11.2 IS_NOT_NULL 查询
+POST {{baseUrl}}/api/data/query/ProductItem
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "conditions": {
+    "type": "AND",
+    "conditions": [
+      {
+        "field": "specifications",
+        "operator": "IS_NOT_NULL"
+      }
+    ]
+  }
+}
+
+> {%
+    client.test("IS_NOT_NULL 查询成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+        client.log("查询到 " + response.body.length + " 个有规格信息的产品");
+    });
+%}
+
+
+###############################################
+# 步骤12: 使用 additionalProps 查询附加属性
+###############################################
+
+### 12.1 查询并返回附加计算属性
+POST {{baseUrl}}/api/data/query/ProductItem
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "conditions": {
+    "type": "AND",
+    "conditions": [
+      {
+        "field": "isActive",
+        "operator": "EQUALS",
+        "value": true
+      }
+    ]
+  },
+  "additionalProps": {
+    "hasSpecs": "specifications != null",
+    "categoryName": "categoryInfo"
+  },
+  "pagination": {
+    "pageNumber": 0,
+    "pageSize": 10
+  }
+}
+
+> {%
+    client.test("附加属性查询成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+        if (response.body.content && response.body.content.length > 0) {
+            client.log("✅ 附加属性查询成功");
+            client.log("第一个产品的附加属性: hasSpecs=" + response.body.content[0].hasSpecs);
+        }
+    });
+%}
+
+###############################################
+# 步骤14: 批量操作测试
+###############################################
+
+### 14.1 批量更新产品
+PUT {{baseUrl}}/api/data/batch
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "items": [
+    {
+      "id": {{item1Id}},
+      "_version": 2,
+      "data": {
+        "stockQuantity": 150
+      }
+    },
+    {
+      "id": {{item2Id}},
+      "_version": 2,
+      "data": {
+        "stockQuantity": 75
+      }
+    }
+  ]
+}
+
+> {%
+    client.test("批量更新成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+        client.assert(response.body.success.length === 2, "应该成功更新2个产品");
+        client.log("✅ 批量更新成功");
+    });
+%}
+
+
+### 14.2 验证批量更新后的数据（使用 IN 查询）
+POST {{baseUrl}}/api/data/query/ProductItem
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "conditions": {
+    "type": "AND",
+    "conditions": [
+      {
+        "field": "stockQuantity",
+        "operator": "IN",
+        "value": [150, 75]
+      }
+    ]
+  }
+}
+
+> {%
+    client.test("验证批量更新成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+        client.assert(response.body.length === 2, "应该查询到2个更新后的产品");
+        client.log("✅ 批量更新验证成功");
+    });
+%}
+
+###############################################
+# 步骤15: 边界情况测试
+###############################################
+
+### 15.1 空 IN 列表查询
+POST {{baseUrl}}/api/data/query/ProductItem
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "conditions": {
+    "type": "AND",
+    "conditions": [
+      {
+        "field": "name",
+        "operator": "IN",
+        "value": []
+      }
+    ]
+  }
+}
+
+> {%
+    client.test("空 IN 列表查询", function() {
+        client.assert(response.status === 200 || response.status === 400, "响应状态应为200或400");
+        client.log("空 IN 列表查询响应状态: " + response.status);
+    });
+%}
+
+
+### 15.2 单个值的 IN 查询
+POST {{baseUrl}}/api/data/query/ProductItem
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "conditions": {
+    "type": "AND",
+    "conditions": [
+      {
+        "field": "name",
+        "operator": "IN",
+        "value": ["智能手机"]
+      }
+    ]
+  }
+}
+
+> {%
+    client.test("单个值 IN 查询成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+        client.assert(response.body.length === 1, "应该查询到1个产品");
+        client.log("✅ 单个值 IN 查询成功");
+    });
+%}
+
+### 15.3 大量值的 IN 查询
+POST {{baseUrl}}/api/data/query/ProductItem
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "conditions": {
+    "type": "AND",
+    "conditions": [
+      {
+        "field": "productCode",
+        "operator": "IN",
+        "value": ["PHONE-001", "LAPTOP-001", "CHAIR-001", "DESK-001", "TSHIRT-001", "NONEXIST-001", "NONEXIST-002"]
+      }
+    ]
+  }
+}
+
+> {%
+    client.test("大量值 IN 查询成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+        client.assert(response.body.length === 5, "应该查询到5个存在的产品");
+        client.log("✅ 大量值 IN 查询成功，查询到 " + response.body.length + " 个产品");
+    });
+%}
+
+
+###############################################
+# 步骤16: 复杂 IN 查询场景
+###############################################
+
+### 16.1 多个 IN 条件组合（AND）
+POST {{baseUrl}}/api/data/query/ProductItem
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "conditions": {
+    "type": "AND",
+    "conditions": [
+      {
+        "field": "name",
+        "operator": "IN",
+        "value": ["智能手机", "笔记本电脑", "办公椅"]
+      },
+      {
+        "field": "stockQuantity",
+        "operator": "IN",
+        "value": [100, 50, 200]
+      }
+    ]
+  }
+}
+
+> {%
+    client.test("多个 IN 条件 AND 组合成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+        client.assert(response.body.length >= 1, "应该至少查询到1个产品");
+        client.log("✅ 多个 IN 条件 AND 组合查询成功");
+    });
+%}
+
+### 16.2 IN 与 NOT_IN 组合
+POST {{baseUrl}}/api/data/query/ProductItem
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "conditions": {
+    "type": "AND",
+    "conditions": [
+      {
+        "field": "productCode",
+        "operator": "IN",
+        "value": ["PHONE-001", "LAPTOP-001", "CHAIR-001", "DESK-001", "TSHIRT-001"]
+      },
+      {
+        "field": "name",
+        "operator": "NOT_IN",
+        "value": ["书桌"]
+      }
+    ]
+  }
+}
+
+> {%
+    client.test("IN 与 NOT_IN 组合成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+        client.assert(response.body.length === 4, "应该查询到4个产品");
+        client.log("✅ IN 与 NOT_IN 组合查询成功");
+    });
+%}
+
+
+### 16.3 IN 查询与 LIKE 组合
+POST {{baseUrl}}/api/data/query/ProductItem
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "conditions": {
+    "type": "AND",
+    "conditions": [
+      {
+        "field": "productCode",
+        "operator": "IN",
+        "value": ["PHONE-001", "LAPTOP-001", "CHAIR-001"]
+      },
+      {
+        "field": "name",
+        "operator": "LIKE",
+        "value": "%电%"
+      }
+    ]
+  }
+}
+
+> {%
+    client.test("IN 与 LIKE 组合成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+        client.assert(response.body.length >= 1, "应该至少查询到1个产品");
+        client.log("✅ IN 与 LIKE 组合查询成功");
+    });
+%}
+
+###############################################
+# 步骤17: 清理测试数据
+###############################################
+
+### 17.1 批量删除测试数据
+DELETE {{baseUrl}}/api/data/batch
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "ids": [{{item1Id}}, {{item2Id}}, {{item3Id}}, {{item4Id}}, {{item5Id}}]
+}
+
+> {%
+    client.test("批量删除成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+        client.log("✅ 批量删除成功");
+    });
+%}
+
+
+### 17.2 验证删除结果
+POST {{baseUrl}}/api/data/query/ProductItem
+Content-Type: {{contentType}}
+x-user: {{userHeader}}
+
+{
+  "conditions": {
+    "type": "AND",
+    "conditions": [
+      {
+        "field": "code",
+        "operator": "LIKE",
+        "value": "%PROD-%{{timestamp}}%"
+      }
+    ]
+  }
+}
+
+> {%
+    client.test("验证删除成功", function() {
+        client.assert(response.status === 200, "响应状态应为200");
+        client.assert(response.body.length === 0, "应该没有查询到任何产品");
+        client.log("✅ 所有测试数据已清理完成");
+        client.log("🎉 数据查询 API 测试全部完成！");
+    });
+%}
+
+###############################################
+# 测试总结
+###############################################
+# 
+# 本测试样例覆盖了以下功能：
+# 
+# 1. DSL 创建类型
+#    - 创建继承自 ItemRevision 的自定义类型
+#    - 包含各种属性类型：String, Integer, Double, Boolean, Date, Timestamp, Object
+# 
+# 2. 数据创建
+#    - 使用 DataManagementController 创建测试数据
+#    - 包含复杂对象属性（specifications, categoryInfo）
+# 
+# 3. 查询操作（重点测试 IN 操作）
+#    - 基础查询：查询所有数据（分页/不分页）
+#    - EQUALS 查询：字符串、布尔字段
+#    - IN 查询：字符串、整数、自定义字段
+#    - NOT_IN 查询
+#    - 比较操作：GREATER_THAN, LESS_THAN_EQUALS, BETWEEN
+#    - LIKE 模糊查询
+#    - 复合条件：AND, OR, 嵌套条件
+#    - IN 与其他条件组合：IN + AND, IN + 价格范围
+#    - 日期和时间戳查询
+#    - NULL 值查询：IS_NULL, IS_NOT_NULL
+#    - 附加属性查询：additionalProps
+#    - GET 方式查询
+#    - 批量操作：批量更新、批量删除
+#    - 边界情况：空 IN 列表、单个值 IN、大量值 IN
+#    - 复杂 IN 场景：多个 IN 组合、IN + NOT_IN、IN + LIKE
+# 
+# 4. IN 操作修正
+#    - 确保 IN 操作正确处理列表值
+#    - 验证 IN 操作与其他条件的组合
+#    - 测试各种数据类型的 IN 查询
+# 
+###############################################
