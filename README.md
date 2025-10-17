@@ -18,6 +18,7 @@
 | 4 | [file-storage-sample](./file-storage-sample/) | **文件存储** - 上传下载、批量操作、附件管理 | 理解票据机制、批量操作、多站点架构 | ⭐⭐ |
 | 5 | [cad-integration-sample](./cad-integration-sample/) | **CAD集成** - 客户端调用、服务端扩展 | 学习CAD集成流程、扩展点机制 | ⭐⭐⭐⭐ |
 | 6 | [integration-test](./integration-test/) | **集成测试** - 各种API使用样例和性能测试 | 参考实际API调用方式、性能优化技巧 | ⭐⭐⭐ |
+| 7 | [rest-sample](./rest-sample/) | **REST样例测试** - 各种REST API使用样例,VSCode中使用httpYac插件以支持返回体的断言| 参考实际REST API调用方式 | ⭐⭐ |
 
 ## 📖 项目详解
 
