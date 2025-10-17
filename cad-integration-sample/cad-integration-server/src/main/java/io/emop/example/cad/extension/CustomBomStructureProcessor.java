@@ -3,6 +3,7 @@ package io.emop.example.cad.extension;
 import io.emop.cad.api.extension.CadBomStructureProcessor;
 import io.emop.cad.model.ItemEntity;
 import io.emop.cad.model.ItemEntityBOMLine;
+import io.emop.model.cad.CADComponent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -50,6 +51,12 @@ public class CustomBomStructureProcessor implements CadBomStructureProcessor {
         
         // 返回null表示使用默认逻辑
         return null;
+    }
+
+    @Override
+    public CADComponent resolveCadComponent(ItemEntity entity) {
+        // 默认返回通用的CADComponent
+        return new CADComponent("sample.CADIntegrationCust");
     }
     
     /**

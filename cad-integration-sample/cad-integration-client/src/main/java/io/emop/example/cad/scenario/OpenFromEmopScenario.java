@@ -3,6 +3,7 @@ package io.emop.example.cad.scenario;
 import io.emop.example.cad.model.ItemEntity;
 import io.emop.example.cad.service.*;
 import io.emop.model.cad.CADComponent;
+import io.emop.model.common.ModelObject;
 import io.emop.model.query.Q;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +32,7 @@ public class OpenFromEmopScenario {
         try {
             log.info("=== 开始从EMOP打开流程 ===");
             
-            Long componentId = Q.result(CADComponent.class).where("code=?",cadComponentCode).first().getId();
+            Long componentId = Q.<ModelObject>objectType("CADIntegrationCust").where("code=?",cadComponentCode).first().getId();
             
             log.info("\n步骤1: 获取BOM结构");
             log.info("ComponentId: {}", componentId);

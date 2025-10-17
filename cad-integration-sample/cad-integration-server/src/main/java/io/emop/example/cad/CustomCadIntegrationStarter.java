@@ -1,6 +1,8 @@
 package io.emop.example.cad;
 
+import io.emop.model.common.UserContext;
 import io.emop.service.S;
+import io.emop.service.api.dsl.DSLExecutionService;
 import io.emop.service.registry.ServiceRegistry;
 import io.emop.spring.serviceprovider.SpringResourceProvider;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +24,23 @@ public class CustomCadIntegrationStarter {
         ServiceRegistry.initAllServices();
         ConfigurableApplicationContext cac = SpringApplication.run(CustomCadIntegrationStarter.class, args);
         ServiceRegistry.register(S.ExternalResourceProvider.class, new SpringResourceProvider(cac));
+        init();
         log.info("CustomCadIntegrationStarter started, swagger: http://localhost:891/cad-integration/api");
+    }
+
+    public static void init() {
+        UserContext.runAsSystem(() -> {
+            S.service(DSLExecutionService.class).execute(
+                """
+                        create type sample.CADIntegrationCust extends CADComponent{
+                            schema: SAMPLE
+                            tableName: CAD_Integration_Cust
+                        } if not exists
+
+                        update type CADIntegrationCust {
+                            codeGenPattern: "CADCUST-${date(pattern='YYMM')}-${autoIncrease(scope='Rule',start='000001',max='999999')}"
+                        }
+                        """);
+        });
     }
 }
