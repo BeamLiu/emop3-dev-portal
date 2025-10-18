@@ -73,6 +73,12 @@ public class IncomingReferenceTest {
         S.withStrongConsistency(this::testPerformanceOptimizationImpl);
     }
 
+    @Test
+    @Order(5)
+    public void testSubtypeSupport() {
+        S.withStrongConsistency(this::testSubtypeSupportImpl);
+    }
+
     /**
      * 测试关联关系的反向查找
      */
@@ -353,6 +359,113 @@ public class IncomingReferenceTest {
             assertEquals(1, refs4.size());
 
             log.info("性能优化场景测试成功完成");
+        });
+    }
+
+    /**
+     * 测试子类型支持
+     * 验证指定 sourceType 时能够匹配其子类型
+     */
+    private void testSubtypeSupportImpl() {
+        TimerUtils.measureExecutionTime("测试子类型支持", () -> {
+            // 准备测试数据：使用 ItemRevision 及其子类 SampleMaterial
+            ItemRevision itemRev = ItemRevision.newModel("ITEM-SUBTYPE-" + System.currentTimeMillis(), "A");
+            itemRev.setName("测试子类型支持-ItemRevision");
+            itemRev = S.service(ObjectService.class).save(itemRev);
+
+            SampleMaterial material = SampleMaterial.newModel("MAT-SUBTYPE-" + System.currentTimeMillis(), "A");
+            material.setName("测试子类型支持-SampleMaterial");
+            material = S.service(ObjectService.class).save(material);
+
+            // 创建目标对象
+            ItemRevision target = ItemRevision.newModel("TARGET-SUBTYPE-" + System.currentTimeMillis(), "A");
+            target.setName("测试子类型支持-Target");
+            target = S.service(ObjectService.class).save(target);
+
+            // 建立关联关系
+            AssociateRelationService associateRelationService = S.service(AssociateRelationService.class);
+            associateRelationService.replaceRelation(itemRev, RelationType.reference, target);
+            associateRelationService.replaceRelation(material, RelationType.reference, target);
+
+            IncomingReferenceService incomingReferenceService = S.service(IncomingReferenceService.class);
+
+            // 测试1：指定父类型 ItemRevision，应该能找到 ItemRevision 和 SampleMaterial 的引用
+            ReferenceQueryContext contextWithParentType = ReferenceQueryContext.builder()
+                    .categories(ReferenceCategory.ASSOCIATE)
+                    .sourceTypes("ItemRevision")  // 指定父类型
+                    .build();
+            List<ReferenceInfo> refsWithParentType = incomingReferenceService.findReferencers(target, contextWithParentType);
+            
+            // 应该找到两个引用：一个来自 ItemRevision，一个来自 SampleMaterial（ItemRevision 的子类）
+            assertEquals(2, refsWithParentType.size());
+            Set<Long> referencerIds = refsWithParentType.stream()
+                    .map(ref -> ref.getReferencer().getId())
+                    .collect(Collectors.toSet());
+            assertTrue(referencerIds.contains(itemRev.getId()));
+            assertTrue(referencerIds.contains(material.getId()));
+
+            // 测试2：只指定子类型 SampleMaterial，应该只找到 SampleMaterial 的引用
+            ReferenceQueryContext contextWithSubType = ReferenceQueryContext.builder()
+                    .categories(ReferenceCategory.ASSOCIATE)
+                    .sourceTypes("SampleMaterial")  // 只指定子类型
+                    .build();
+            List<ReferenceInfo> refsWithSubType = incomingReferenceService.findReferencers(target, contextWithSubType);
+            
+            // 应该只找到一个引用：来自 SampleMaterial
+            assertEquals(1, refsWithSubType.size());
+            assertEquals(material.getId(), refsWithSubType.get(0).getReferencer().getId());
+
+            // 测试3：结构关系的子类型支持
+            SampleTask parentTask = new SampleTask();
+            parentTask.setName("Parent Task For Subtype Test");
+            parentTask.setCode("TASK-PARENT-SUBTYPE-" + System.currentTimeMillis());
+            parentTask.setRevId("A");
+            parentTask = S.service(ObjectService.class).upsertByBusinessKey(parentTask);
+
+            SampleTask childTask = new SampleTask();
+            childTask.setName("Child Task For Subtype Test");
+            childTask.setCode("TASK-CHILD-SUBTYPE-" + System.currentTimeMillis());
+            childTask.setRevId("A");
+            childTask.setGroupTaskId(parentTask.getId());
+            childTask = S.service(ObjectService.class).upsertByBusinessKey(childTask);
+
+            // 使用父类型 ItemRevision 查询结构关系（SampleTask 是 ItemRevision 的子类）
+            ReferenceQueryContext structuralContextWithParentType = ReferenceQueryContext.builder()
+                    .categories(ReferenceCategory.STRUCTURAL)
+                    .sourceTypes("ItemRevision")  // 指定父类型
+                    .build();
+            List<ReferenceInfo> structuralRefs = incomingReferenceService.findReferencers(childTask, structuralContextWithParentType);
+            
+            // 应该能找到 SampleTask 的结构关系
+            assertEquals(1, structuralRefs.size());
+            assertEquals(parentTask.getId(), structuralRefs.get(0).getReferencer().getId());
+            assertEquals(ReferenceType.STRUCTURAL, structuralRefs.get(0).getReferenceType());
+
+            // 测试4：版本引用的子类型支持
+            SampleMaterial refTarget = SampleMaterial.newModel("MAT-REF-TARGET-" + System.currentTimeMillis(), "A");
+            refTarget.setName("测试版本引用子类型支持");
+            refTarget = S.service(ObjectService.class).save(refTarget);
+
+            SampleMaterialReference matRef = SampleMaterialReference.newModel();
+            matRef.setQuantity(5);
+            matRef.setName("引用测试-子类型-" + System.currentTimeMillis());
+            matRef.setTarget(refTarget);
+            matRef = S.service(ObjectService.class).save(matRef);
+
+            // 使用父类型查询版本引用（假设 SampleMaterialReference 有父类）
+            ReferenceQueryContext revContextWithType = ReferenceQueryContext.builder()
+                    .categories(ReferenceCategory.REVISIONABLE)
+                    .sourceTypes("SampleMaterialReference")
+                    .revisionRule(RevisionRule.PRECISE)
+                    .build();
+            List<ReferenceInfo> revRefs = incomingReferenceService.findReferencers(refTarget, revContextWithType);
+            
+            // 应该能找到引用
+            assertEquals(1, revRefs.size());
+            assertEquals(matRef.getId(), revRefs.get(0).getReferencer().getId());
+            assertEquals(ReferenceType.REVISIONABLE_REFERENCE, revRefs.get(0).getReferenceType());
+
+            log.info("子类型支持测试成功完成");
         });
     }
 
