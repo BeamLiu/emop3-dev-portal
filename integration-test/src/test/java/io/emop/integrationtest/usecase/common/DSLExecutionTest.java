@@ -222,6 +222,16 @@ public class DSLExecutionTest {
         });
     }
 
+    @Test
+    @Order(18)
+    public void testSelfReferencingType() {
+        UserContext.runAsSystem(() -> {
+            UserContext.ensureCurrent().byPass(() -> {
+                testSelfReferencingTypeImpl();
+            });
+        });
+    }
+
     // ================ 实现方法（保持原有逻辑不变）================
 
     private void testDeleteType() {
@@ -1307,6 +1317,101 @@ public class DSLExecutionTest {
                 """, bucketPath);
         Object result = S.service(DSLExecutionService.class).execute(importDsl);
         log.info("XPath import ({},{}) result: {}", code1, code2, result);
+    }
+
+    private void testSelfReferencingTypeImpl() {
+        // Clean up if type exists
+        try {
+            S.service(DSLExecutionService.class).execute("delete type sample.CreoCADBomLine");
+        } catch (Exception e) {
+            log.warn("Error deleting existing type: " + e.getMessage());
+        }
+
+        // Test creating a self-referencing type with both simple and full qualified names
+        String dsl = """
+                create type sample.CreoCADBomLine extends BomLine {
+                    -> CreoCADBomLine[] as children {
+                        foreignKey: parentId
+                    }
+                    -> CreoCADBomLine as `parent` {
+                        foreignKey: parentId
+                    }
+                    multilang {
+                        name.zh_CN: "CREO集成BOM行"
+                        name.en_US: "CREO BOM Line"
+                        description.zh_CN: "CREO集成BOM行，单独存储以达到定制化和分表的目的"
+                        description.en_US: "CREO CAD BOM Structure Line, stored separately for customization and partitioning"
+                    }
+                    table: CREO_CAD_BomLine
+                    schema: BOM
+                } if not exists
+                """;
+
+        Object result = S.service(DSLExecutionService.class).execute(dsl);
+        assertNotNull(result);
+        log.info("Self-referencing type creation result: " + result);
+        assertTrue(result.toString().contains("created successfully") || result.toString().contains("already exists"));
+
+        // Verify the type was created correctly
+        TypeDefinition typeDef = S.service(MetadataService.class).getTypeDefinitionByName("sample.CreoCADBomLine");
+        assertNotNull(typeDef);
+        assertEquals("sample.CreoCADBomLine", typeDef.getName());
+
+        // Verify self-referencing relationships
+        AttributeDefinition childrenAttr = typeDef.getAttribute("children");
+        assertNotNull(childrenAttr);
+        assertTrue(childrenAttr.checkIsStructuralRelation());
+        assertEquals("parentId", childrenAttr.asStructuralRelation().getForeignKeyField());
+        assertTrue(childrenAttr.getType().isList());
+
+        AttributeDefinition parentAttr = typeDef.getAttribute("parent");
+        assertNotNull(parentAttr);
+        assertTrue(parentAttr.checkIsStructuralRelation());
+        assertEquals("parentId", parentAttr.asStructuralRelation().getForeignKeyField());
+        assertFalse(parentAttr.getType().isList());
+
+        // Verify multilang
+        assertEquals("CREO集成BOM行", typeDef.get_multiLang().get("name.zh_CN"));
+        assertEquals("CREO BOM Line", typeDef.get_multiLang().get("name.en_US"));
+
+        // Test creating objects with self-referencing relationships
+        String createRootDsl = """
+                create object sample.CreoCADBomLine {
+                    code: "ROOT-001",
+                    name: "Root BOM Line"
+                }
+                """;
+        result = S.service(DSLExecutionService.class).execute(createRootDsl);
+        Long rootId = extractID(result.toString());
+        log.info("Created root BOM line with ID: " + rootId);
+
+        String createChildDsl = """
+                create object sample.CreoCADBomLine {
+                    code: "CHILD-001",
+                    name: "Child BOM Line",
+                    parentId: %d
+                }
+                """;
+        createChildDsl = String.format(createChildDsl, rootId);
+        result = S.service(DSLExecutionService.class).execute(createChildDsl);
+        Long childId = extractID(result.toString());
+        log.info("Created child BOM line with ID: " + childId);
+
+        // Verify the parent-child relationship
+        ModelObject rootObj = new ObjectRef(rootId).unbox();
+        assertNotNull(rootObj);
+        List<ModelObject> children = (List<ModelObject>) rootObj.get("children");
+        assertNotNull(children);
+        assertEquals(1, children.size());
+        assertEquals(childId, children.get(0).getId());
+
+        ModelObject childObj = new ObjectRef(childId).unbox();
+        assertNotNull(childObj);
+        ModelObject parent = (ModelObject) childObj.get("parent");
+        assertNotNull(parent);
+        assertEquals(rootId, parent.getId());
+
+        log.info("Self-referencing type test completed successfully");
     }
 
     public static String getFullStackTrace(Throwable throwable) {
