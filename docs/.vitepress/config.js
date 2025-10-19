@@ -55,6 +55,7 @@ export default withMermaid(
 				{ text: '基本概念', link: '/business/modeling/guide' },
 				{ text: '如何定义业务模型', link: '/business/modeling/modeling' },
 				{ text: '模型扩展方法', link: '/business/modeling/extension' },
+				{ text: '业务分表存储优化', link: '/business/modeling/table-partitioning' },
 				{ text: 'Trait(特征)使用手册', link: '/business/modeling/trait' },
 				{ text: '业务对象状态管理', link: '/business/modeling/state-management' }
 			  ]

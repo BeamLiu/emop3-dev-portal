@@ -90,9 +90,4 @@ public class CustomPropertyProcessor implements CadPropertyProcessor {
         };
         return weight * pricePerKg;
     }
-    
-    @Override
-    public int getOrder() {
-        return 10;
-    }
 }

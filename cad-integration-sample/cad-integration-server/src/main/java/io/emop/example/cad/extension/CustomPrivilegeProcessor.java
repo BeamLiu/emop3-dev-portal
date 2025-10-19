@@ -72,10 +72,4 @@ public class CustomPrivilegeProcessor implements ItemPrivilegeProcessor {
         // 示例3：根据Item类型设置权限
         // 可以根据业务需求添加更多规则
     }
-    
-    @Override
-    public int getOrder() {
-        // 优先级：数字越小优先级越高
-        return 10;
-    }
 }

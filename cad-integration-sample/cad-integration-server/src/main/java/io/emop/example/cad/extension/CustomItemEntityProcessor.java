@@ -79,10 +79,4 @@ public class CustomItemEntityProcessor implements CadItemEntityProcessor {
             // 例如：ERP系统的成本信息、库存信息等
         }
     }
-    
-    @Override
-    public int getOrder() {
-        // 优先级：数字越小优先级越高
-        return 10;
-    }
 }

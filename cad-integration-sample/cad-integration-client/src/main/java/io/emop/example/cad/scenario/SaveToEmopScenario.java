@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * 保存到EMOP场景
@@ -46,6 +47,10 @@ public class SaveToEmopScenario {
                     new TypeReference<List<ItemEntity>>() {
                     });
             log.info("加载了 {} 个ItemEntity", itemEntities.size());
+            itemEntities.forEach(itemEntity -> {
+                itemEntity.getProps().put("材质", new Random().nextBoolean() ? "不锈钢" : "塑料");
+                itemEntity.getProps().put("重量", new Random().nextFloat(0, 10f));
+            });
 
             // 步骤2: 调用Compare API
             log.info("\n步骤2: 调用Compare API进行BOM比对");

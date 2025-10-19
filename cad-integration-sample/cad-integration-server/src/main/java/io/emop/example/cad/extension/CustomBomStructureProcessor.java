@@ -1,8 +1,11 @@
 package io.emop.example.cad.extension;
 
+import io.emop.cad.api.CadContext;
 import io.emop.cad.api.extension.CadBomStructureProcessor;
 import io.emop.cad.model.ItemEntity;
 import io.emop.cad.model.ItemEntityBOMLine;
+import io.emop.model.bom.BomLine;
+import io.emop.model.bom.BomView;
 import io.emop.model.cad.CADComponent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -151,9 +154,29 @@ public class CustomBomStructureProcessor implements CadBomStructureProcessor {
         // 默认为自制
         return "自制";
     }
-    
+
+    /**
+     * 自定义BomView实例，可以根据不同的CAD类型存储到不同的表当中
+     */
     @Override
-    public int getOrder() {
-        return 10;
+    public BomView resolveBomView(ItemEntity rootItem) {
+        if ("creo".equalsIgnoreCase(CadContext.currentClient())) {
+            return new BomView("sample.CreoCADBomView");
+        } else {
+            return new BomView(BomView.class.getName());
+        }
     }
+
+    /**
+     * 自定义BomLine实例，可以根据不同的CAD类型存储到不同的表当中
+     */
+    @Override
+    public BomLine resolveBomLine(ItemEntity entity) {
+        if ("creo".equalsIgnoreCase(CadContext.currentClient())) {
+            return new BomLine("sample.CreoCADBomLine");
+        } else {
+            return new BomLine(BomLine.class.getName());
+        }
+    }
+    
 }

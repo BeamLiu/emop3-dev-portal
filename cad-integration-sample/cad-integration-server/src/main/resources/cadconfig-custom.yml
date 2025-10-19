@@ -107,6 +107,20 @@ cadOptions:
           - value: "false"
             cadValue: "NO"
 
+syncProps:
+  - display: 材质
+    cad: default
+    type: String
+    propName: material
+    strategy: TWO_WAY
+    enabled: true
+  - display: 重量
+    cad: default
+    type: Float
+    propName: weight
+    strategy: TWO_WAY
+    enabled: true
+
 # 数据集引用类型映射
 fileEntityType2DatasetRefTypeMap:
   default:
