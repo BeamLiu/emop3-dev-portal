@@ -32,6 +32,7 @@ public class SaveToEmopScenario {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public String execute() {
+        long compareTime = 0, postTime = 0, uploadTime = 0, conversionTime = 0;
         try {
             log.info("=== 开始保存到EMOP流程 ===");
 
@@ -54,7 +55,9 @@ public class SaveToEmopScenario {
 
             // 步骤2: 调用Compare API
             log.info("\n步骤2: 调用Compare API进行BOM比对");
+            long compareStartTime = System.currentTimeMillis();
             List<ItemEntity> comparedEntities = cadApiService.compareItemEntity(itemEntities);
+            compareTime = System.currentTimeMillis() - compareStartTime;
             log.info("Compare完成，返回 {} 个ItemEntity", comparedEntities.size());
 
             // 步骤3: 提交BOM结构到EMOP（创建Item、Component和File对象）
@@ -63,7 +66,9 @@ public class SaveToEmopScenario {
             comparedEntities.get(0).getDrwFiles().add(new FileEntity());
             comparedEntities.get(0).getDrwFiles().get(0).setName("sample.drw");
             comparedEntities.get(0).getDrwFiles().get(0).setPath("/home/sample/sample.drw");
+            long postStartTime = System.currentTimeMillis();
             PostItemEntityResponse postResponse = cadApiService.postItemEntity(comparedEntities);
+            postTime = System.currentTimeMillis() - postStartTime;
             log.info("BOM结构提交成功，File对象已创建");
 
             // 步骤4: 从Post响应中提取最终的文件ID映射
@@ -85,17 +90,20 @@ public class SaveToEmopScenario {
             // 步骤6: 批量上传ZIP文件（UPDATE_ONLY）
             log.info("\n步骤6: 批量上传ZIP文件更新File对象（UPDATE_ONLY）");
             log.info("元数据配置已包含在ZIP文件的 __file_metadata__.json 中");
+            long uploadStartTime = System.currentTimeMillis();
             fileStorageService.bulkUploadZip(
                     reorganizedZip,
                     "cad",
                     "demo/cad-integration-client",
                     "UPDATE_ONLY");
+            uploadTime = System.currentTimeMillis() - uploadStartTime;
             log.info("文件上传成功，File对象已更新");
 
             // 步骤7: 提交轻量化转图任务（针对零件或装配，用于界面查看）
             log.info("\n步骤7: 提交轻量化转图任务");
-            
+            long conversionStartTime = System.currentTimeMillis();
             String conversionJobId = cadApiService.submitConversionJob(postResponse.getComponentId());
+            conversionTime = System.currentTimeMillis() - conversionStartTime;
             log.info("轻量化转图任务已提交，JobId: {}", conversionJobId);
             log.info("可通过 http://localhost:861/dashboard/jobs/{} 查看转图进度", conversionJobId);
             log.info("转换后的文件将存储在MinIO的 cad:cad/demo/cad-integration-client/{{fileId}}/converted/ 子目录下");
@@ -105,6 +113,12 @@ public class SaveToEmopScenario {
             originalZip.delete();
 
             log.info("\n=== 保存到EMOP流程完成 ===");
+            log.info("\n【性能统计】");
+            log.info("  Compare API 耗时: {} ms", compareTime);
+            log.info("  提交BOM结构 耗时: {} ms", postTime);
+            log.info("  批量上传文件 耗时: {} ms", uploadTime);
+            log.info("  提交转图任务 耗时: {} ms", conversionTime);
+            log.info("  服务器交互总耗时: {} ms", (compareTime + postTime + uploadTime + conversionTime));
 
             // 返回根Item的ItemCode
             return postResponse.getItemEntities().stream()

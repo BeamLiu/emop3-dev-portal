@@ -29,6 +29,7 @@ public class OpenFromEmopScenario {
     private final String cadComponentCode;
 
     public void execute() {
+        long getTime = 0, downloadTime = 0;
         try {
             log.info("=== 开始从EMOP打开流程 ===");
             
@@ -38,7 +39,9 @@ public class OpenFromEmopScenario {
             log.info("ComponentId: {}", componentId);
             
             try {
+                long getStartTime = System.currentTimeMillis();
                 List<ItemEntity> itemEntities = cadApiService.getItemEntity(componentId);
+                getTime = System.currentTimeMillis() - getStartTime;
                 log.info("获取到 {} 个ItemEntity", itemEntities.size());
                 
                 // 步骤2: 收集所有文件ID
@@ -52,10 +55,13 @@ public class OpenFromEmopScenario {
                 if (!fileIds.isEmpty()) {
                     // 步骤3: 批量下载文件
                     log.info("\n步骤3: 批量下载CAD文件");
+                    long downloadStartTime = System.currentTimeMillis();
                     byte[] zipContent = fileStorageService.bulkDownloadByIds(
                         fileIds, 
                         "cad-model-download.zip"
                     );
+                    downloadTime = System.currentTimeMillis() - downloadStartTime;
+                    log.info("批量下载完成");
                     
                     // 步骤4: 保存到本地
                     log.info("\n步骤4: 保存文件到本地");
@@ -65,6 +71,10 @@ public class OpenFromEmopScenario {
                 }
                 
                 log.info("\n=== 从EMOP打开流程完成 ===");
+                log.info("\n【性能统计】");
+                log.info("  获取BOM结构 耗时: {} ms", getTime);
+                log.info("  批量下载文件 耗时: {} ms", downloadTime);
+                log.info("  服务器交互总耗时: {} ms", (getTime + downloadTime));
                 
             } catch (Exception e) {
                 log.warn("从EMOP打开演示失败（可能是componentId不存在）: {}", e.getMessage());
