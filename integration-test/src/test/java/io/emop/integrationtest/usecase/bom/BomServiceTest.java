@@ -568,7 +568,7 @@ public class BomServiceTest {
         allIds.addAll(children.stream().map(ModelObject::getId).collect(Collectors.toList()));
 
         try {
-            objectService.forceDelete(allIds);
+            objectService.forceDelete(allIds.stream().filter(Objects::nonNull).collect(Collectors.toList()));
         } catch (Exception e) {
             log.warn("清理测试数据时出错: {}", e.getMessage());
         }

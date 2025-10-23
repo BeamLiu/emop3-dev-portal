@@ -60,9 +60,6 @@ public final class TypeTestEntity extends ItemRevision {
 
     // ========== 日期时间类型 ==========
     @QuerySqlField
-    private Date utilDateField;
-
-    @QuerySqlField
     private java.sql.Date sqlDateField;
 
     @QuerySqlField
@@ -235,7 +232,6 @@ public final class TypeTestEntity extends ItemRevision {
 
         // 日期时间类型
         long currentTime = System.currentTimeMillis();
-        entity.setUtilDateField(new Date(currentTime));
         entity.setSqlDateField(new java.sql.Date(currentTime));
         entity.setTimestampField(new Timestamp(currentTime));
         entity.setLocalDateField(LocalDate.now());

@@ -1,18 +1,13 @@
 package io.emop.integrationtest.usecase.common;
 
-import io.emop.model.common.AbstractModelObject;
-import io.emop.model.common.CodeSequence;
-import io.emop.model.common.ModelObject;
-import io.emop.model.common.UserContext;
-import io.emop.model.metadata.TypeDefinition;
+import io.emop.model.bom.BomLine;
+import io.emop.model.common.*;
 import io.emop.model.query.Q;
 import io.emop.integrationtest.domain.SampleDataset;
 import io.emop.integrationtest.domain.SampleDocument;
 import io.emop.service.S;
 import io.emop.service.api.data.ObjectService;
 import io.emop.service.api.domain.common.CodeGeneratorService;
-import io.emop.service.api.metadata.MetadataService;
-import io.emop.service.api.metadata.MetadataUpdateService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 
@@ -20,7 +15,6 @@ import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
-import static io.emop.integrationtest.util.Assertion.assertEquals;
 import static io.emop.integrationtest.util.Assertion.assertTrue;
 
 @Slf4j
@@ -320,5 +314,131 @@ public class CodeGeneratorServiceTest {
         }
 
         return objects;
+    }
+
+    @Test
+    @Order(8)
+    public void testUpdateCode() {
+        log.info("=== 测试编码更新功能 ===");
+
+        S.withStrongConsistency(() -> {
+            // 使用时间戳确保编码唯一性
+            String timestamp = String.valueOf(System.currentTimeMillis());
+            String oldCode = "TEST-ITEM-" + timestamp;
+            String newCode = "TEST-ITEM-NEW-" + timestamp;
+
+            // 1. 创建第一个版本的 ItemRevision (版本 A)
+            ItemRevision itemRevA = ItemRevision.newModel(oldCode, "A");
+            itemRevA.setName("测试物料-版本A");
+            itemRevA = objectService.save(itemRevA);
+            log.info("创建 ItemRevision A: code={}, revId={}, id={}", itemRevA.getCode(), itemRevA.getRevId(), itemRevA.getId());
+
+            // 2. 创建第二个版本的 ItemRevision (版本 B)
+            ItemRevision itemRevB = ItemRevision.newModel(oldCode, "B");
+            itemRevB.setName("测试物料-版本B");
+            itemRevB = objectService.save(itemRevB);
+            log.info("创建 ItemRevision B: code={}, revId={}, id={}", itemRevB.getCode(), itemRevB.getRevId(), itemRevB.getId());
+
+            // 3. 创建 BomLine1，引用版本 A
+            BomLine bomLine1 = BomLine.newModel();
+            bomLine1.setTarget(itemRevA);
+            bomLine1.setQuantity(10.0f);
+            bomLine1.setUnit("PCS");
+            bomLine1 = objectService.save(bomLine1);
+            log.info("创建 BomLine1: id={}, targetCode={}, targetRevId={}", 
+                    bomLine1.getId(), bomLine1.getTargetCode(), bomLine1.getTargetInfo().getTargetRevId());
+
+            // 4. 创建 BomLine2，引用版本 A
+            BomLine bomLine2 = BomLine.newModel();
+            bomLine2.setTarget(itemRevA);
+            bomLine2.setQuantity(20.0f);
+            bomLine2.setUnit("PCS");
+            bomLine2 = objectService.save(bomLine2);
+            log.info("创建 BomLine2: id={}, targetCode={}, targetRevId={}", 
+                    bomLine2.getId(), bomLine2.getTargetCode(), bomLine2.getTargetInfo().getTargetRevId());
+
+            // 5. 创建 BomLine3，引用版本 B
+            BomLine bomLine3 = BomLine.newModel();
+            bomLine3.setTarget(itemRevB);
+            bomLine3.setQuantity(30.0f);
+            bomLine3.setUnit("PCS");
+            bomLine3 = objectService.save(bomLine3);
+            log.info("创建 BomLine3: id={}, targetCode={}, targetRevId={}", 
+                    bomLine3.getId(), bomLine3.getTargetCode(), bomLine3.getTargetInfo().getTargetRevId());
+
+            // 6. 验证初始状态
+            assertTrue(oldCode.equals(bomLine1.getTargetCode()));
+            assertTrue(oldCode.equals(bomLine2.getTargetCode()));
+            assertTrue(oldCode.equals(bomLine3.getTargetCode()));
+            assertTrue("A".equals(bomLine1.getTargetInfo().getTargetRevId()));
+            assertTrue("A".equals(bomLine2.getTargetInfo().getTargetRevId()));
+            assertTrue("B".equals(bomLine3.getTargetInfo().getTargetRevId()));
+            log.info("✓ 初始状态验证通过");
+
+            // 7. 执行编码更新
+            log.info("开始更新编码: {} -> {}", oldCode, newCode);
+            codeGeneratorService.updateCode(itemRevA.get_objectType(), oldCode, newCode);
+            log.info("编码更新完成");
+
+            // 8. 重新加载对象，验证更新结果
+            itemRevA.reload();
+            itemRevB.reload();
+            bomLine1.reload();
+            bomLine2.reload();
+            bomLine3.reload();
+
+            // 9. 验证所有 ItemRevision 的 code 都已更新
+            assertTrue(newCode.equals(itemRevA.getCode()));
+            assertTrue(newCode.equals(itemRevB.getCode()));
+            log.info("✓ ItemRevision A code 已更新: {} -> {}", oldCode, itemRevA.getCode());
+            log.info("✓ ItemRevision B code 已更新: {} -> {}", oldCode, itemRevB.getCode());
+
+            // 10. 验证所有 BomLine 的 targetItemCode 都已更新
+            assertTrue(newCode.equals(bomLine1.getTargetCode()));
+            assertTrue(newCode.equals(bomLine2.getTargetCode()));
+            assertTrue(newCode.equals(bomLine3.getTargetCode()));
+            log.info("✓ BomLine1 targetItemCode 已更新: {}", bomLine1.getTargetCode());
+            log.info("✓ BomLine2 targetItemCode 已更新: {}", bomLine2.getTargetCode());
+            log.info("✓ BomLine3 targetItemCode 已更新: {}", bomLine3.getTargetCode());
+
+            // 11. 验证 BomLine 的 targetRevId 保持不变
+            assertTrue("A".equals(bomLine1.getTargetInfo().getTargetRevId()));
+            assertTrue("A".equals(bomLine2.getTargetInfo().getTargetRevId()));
+            assertTrue("B".equals(bomLine3.getTargetInfo().getTargetRevId()));
+            log.info("✓ BomLine 的 targetRevId 保持不变");
+
+            // 12. 验证 BomLine 仍然可以正确解析到对应版本的目标对象
+            Revisionable resolved1 = bomLine1.resolveTarget();
+            Revisionable resolved2 = bomLine2.resolveTarget();
+            Revisionable resolved3 = bomLine3.resolveTarget();
+
+            assertTrue(resolved1 != null);
+            assertTrue(resolved2 != null);
+            assertTrue(resolved3 != null);
+            
+            // 验证解析到的对象 code 都是新编码
+            assertTrue(newCode.equals(resolved1.getCode()));
+            assertTrue(newCode.equals(resolved2.getCode()));
+            assertTrue(newCode.equals(resolved3.getCode()));
+            
+            // 验证解析到的对象 ID 和版本号正确
+            assertTrue(itemRevA.getId().equals(resolved1.getId()));
+            assertTrue(itemRevA.getId().equals(resolved2.getId()));
+            assertTrue(itemRevB.getId().equals(resolved3.getId()));
+            assertTrue("A".equals(resolved1.getRevId()));
+            assertTrue("A".equals(resolved2.getRevId()));
+            assertTrue("B".equals(resolved3.getRevId()));
+            
+            log.info("✓ BomLine1 解析到版本 A: code={}, revId={}", resolved1.getCode(), resolved1.getRevId());
+            log.info("✓ BomLine2 解析到版本 A: code={}, revId={}", resolved2.getCode(), resolved2.getRevId());
+            log.info("✓ BomLine3 解析到版本 B: code={}, revId={}", resolved3.getCode(), resolved3.getRevId());
+
+            // 13. 清理测试数据
+            objectService.delete(bomLine1.getId(), bomLine2.getId(), bomLine3.getId(), 
+                    itemRevA.getId(), itemRevB.getId());
+            log.info("测试数据已清理");
+
+            log.info("=== 编码更新功能测试完成 ===");
+        });
     }
 }
