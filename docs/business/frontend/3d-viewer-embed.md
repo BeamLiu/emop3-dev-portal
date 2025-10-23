@@ -197,7 +197,7 @@ https://dev.emop.emopdata.com/web/public-3d.html?model=/minioproxy/api/file-prox
 
 如果用户在 第三方 中，需要跳转到 EMOP3 的 3D 预览页面，可以使用认证重定向机制：
 
-**步骤1：EMOP2 获取 access_token**
+**步骤1： 获取 access_token**
 
 ```javascript
 // 在 第三方 中完成认证后获取 token
