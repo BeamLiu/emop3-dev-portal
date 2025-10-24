@@ -126,7 +126,6 @@ public class TypeIntegrationTest {
             assertTrue(new BigInteger("123456789012345").doubleValue() - found.getBigIntegerField().doubleValue() < 0.001);
 
             // 验证日期时间类型
-            assertNotNull(found.getUtilDateField());
             assertNotNull(found.getSqlDateField());
             assertNotNull(found.getTimestampField());
             assertNotNull(found.getLocalDateField());
@@ -269,7 +268,6 @@ public class TypeIntegrationTest {
             entity.setBigIntegerField(new BigInteger("99999999999999999999"));
 
             // 测试特殊日期
-            entity.setUtilDateField(new Date(0)); // Unix epoch
             entity.setSqlDateField(new java.sql.Date(0));
             entity.setTimestampField(new Timestamp(0));
             entity.setLocalDateField(LocalDate.of(1970, 1, 1));

@@ -131,7 +131,6 @@ public class QuickTypeValidationTest {
         entity.setName("日期时间类型验证");
 
         long currentTime = System.currentTimeMillis();
-        entity.setUtilDateField(new Date(currentTime));
         entity.setSqlDateField(new java.sql.Date(currentTime));
         entity.setTimestampField(new Timestamp(currentTime));
         entity.setLocalDateField(LocalDate.now());
@@ -144,7 +143,6 @@ public class QuickTypeValidationTest {
 
         TypeTestEntity found = objectService.findById(saved.getId());
         assertNotNull("查询失败", found);
-        assertNotNull("util.Date为空", found.getUtilDateField());
         assertNotNull("sql.Date为空", found.getSqlDateField());
         assertNotNull("Timestamp为空", found.getTimestampField());
         assertNotNull("LocalDate为空", found.getLocalDateField());

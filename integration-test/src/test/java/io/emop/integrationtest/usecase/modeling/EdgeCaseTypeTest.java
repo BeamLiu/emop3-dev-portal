@@ -226,7 +226,6 @@ public class EdgeCaseTypeTest {
             entity.setName("日期时间边界测试");
 
             // 测试Unix时间戳边界
-            entity.setUtilDateField(new Date(0)); // 1970-01-01 00:00:00 UTC
             entity.setSqlDateField(new java.sql.Date(0));
             entity.setTimestampField(new Timestamp(0));
 
@@ -238,7 +237,6 @@ public class EdgeCaseTypeTest {
             // 测试极端未来日期
             TypeTestEntity futureEntity = new TypeTestEntity("FUTURE_" + code, REV_ID);
             futureEntity.setName("未来日期测试");
-            futureEntity.setUtilDateField(new Date(Long.MAX_VALUE / 1000)); // 避免溢出
             futureEntity.setLocalDateField(LocalDate.of(9999, 12, 31));
             futureEntity.setLocalDateTimeField(LocalDateTime.of(9999, 12, 31, 23, 59, 59));
 
@@ -252,7 +250,6 @@ public class EdgeCaseTypeTest {
 
             // 验证日期时间保存正确
             TypeTestEntity found = objectService.findById(saved.getId());
-            assertEquals(0L, found.getUtilDateField().getTime());
             assertEquals(LocalDate.of(1900, 1, 1), found.getLocalDateField());
             assertEquals(Instant.EPOCH, found.getInstantField());
 

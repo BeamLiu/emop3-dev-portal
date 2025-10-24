@@ -1362,13 +1362,13 @@ public class DSLExecutionTest {
         assertNotNull(childrenAttr);
         assertTrue(childrenAttr.checkIsStructuralRelation());
         assertEquals("parentId", childrenAttr.asStructuralRelation().getForeignKeyField());
-        assertTrue(childrenAttr.getType().isList());
+        assertTrue(childrenAttr.getType().isCollection());
 
         AttributeDefinition parentAttr = typeDef.getAttribute("parent");
         assertNotNull(parentAttr);
         assertTrue(parentAttr.checkIsStructuralRelation());
         assertEquals("parentId", parentAttr.asStructuralRelation().getForeignKeyField());
-        assertFalse(parentAttr.getType().isList());
+        assertFalse(parentAttr.getType().isCollection());
 
         // Verify multilang
         assertEquals("CREO集成BOM行", typeDef.get_multiLang().get("name.zh_CN"));
