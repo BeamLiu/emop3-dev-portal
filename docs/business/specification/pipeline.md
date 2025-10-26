@@ -270,6 +270,12 @@ BatchOperatorDSL支持1-5个参数的类型安全提取：
 .andExecute(tuples -> {  // List<Tuple5<T1, T2, T3, T4, T5>>
     // 处理逻辑
 });
+
+// 六参数 - Tuple6
+.extract("p1", T1.class, "p2", T2.class, "p3", T3.class, "p4", T4.class, "p5", T5.class, "p6", T6.class)
+.andExecute(tuples -> {  // List<Tuple6<T1, T2, T3, T4, T5, T6>>
+    // 处理逻辑
+});
 ```
 
 ### 3.5 分组执行 - 自定义分组键
