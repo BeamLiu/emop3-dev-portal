@@ -346,7 +346,8 @@ public class BomServiceTest {
             // 验证新的父节点
             BomLine movedCheck = objectService.findById(moved.getId());
             assertNotNull(movedCheck);
-            assertNotNull(movedCheck.get("parent"));
+            assertEquals(1, movedCheck.resolveAllPossibleParentsFromDB().size());
+            assertEquals(parent2F.getCode(), movedCheck.resolveAllPossibleParentsFromDB().get(0).getTargetCode());
 
             log.info("✅ 移动 BOM 行成功");
         });
