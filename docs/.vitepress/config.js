@@ -185,6 +185,7 @@ export default withMermaid(
 			  { text: '图数据检索设计', link: '/platform/graph-search' },
 			  { text: 'RPC批量执行设计', link: '/platform/pipeline' },
 			  { text: '异地文件服务设计', link: '/platform/distributed-file-service' },
+			  { text: '事件通知设计', link: '/platform/event-bus' }, 
 			  { text: '平台组件及服务监控设计', link: '/platform/monitoring' },
           ]
         },
