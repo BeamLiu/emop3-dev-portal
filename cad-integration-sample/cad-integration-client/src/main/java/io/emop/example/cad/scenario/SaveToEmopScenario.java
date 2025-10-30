@@ -9,11 +9,13 @@ import io.emop.example.cad.model.PostItemEntityResponse;
 import io.emop.example.cad.service.*;
 import io.emop.example.cad.util.Utils;
 import io.emop.model.query.tuple.Tuple2;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -120,6 +122,9 @@ public class SaveToEmopScenario {
             log.info("  提交转图任务 耗时: {} ms", conversionTime);
             log.info("  服务器交互总耗时: {} ms", (compareTime + postTime + uploadTime + conversionTime));
 
+            // 测试扁平化数据场景（无BOM结构）
+            testFlatDataScenarios();
+
             // 返回根Item的ItemCode
             return postResponse.getItemEntities().stream()
                     .filter(e -> e.getRoot() != null && e.getRoot())
@@ -130,5 +135,124 @@ public class SaveToEmopScenario {
             log.error("保存到EMOP失败", e);
             throw new RuntimeException(e);
         }
+    }
+
+    private final String dateCode = System.currentTimeMillis() + "";
+    
+    /**
+     * 测试扁平化数据场景（无BOM结构）
+     * 场景1: 新建物料
+     * 场景2: 同时创建新物料和更新现有物料
+     */
+    private void testFlatDataScenarios() {
+        log.info("\n=== 测试扁平化数据场景（无BOM结构）===");
+        
+        try {
+            // 场景1: 新建物料 - 扁平化数据
+            log.info("\n场景1: 新建物料（扁平化数据）");
+            ItemEntity newItem = createFlatDataItem("FLAT-NEW-001-" + dateCode, "新建扁平化物料");
+            log.info("新建物料成功: {} (ID: {})", newItem.getItemCode(), newItem.getId());
+            
+            // 场景2: 同时创建新物料和更新现有物料 - 扁平化数据
+            log.info("\n场景2: 同时创建新物料和更新现有物料（扁平化数据）");
+            List<ItemEntity> mixedItems = createAndUpdateFlatDataItems(newItem.getId(), newItem.getItemCode());
+            log.info("批量操作成功，共处理 {} 个物料", mixedItems.size());
+            mixedItems.forEach(item -> {
+                log.info("  - {} (ID: {}, UseType: {})", 
+                    item.getItemCode(), item.getId(), item.getUseType());
+            });
+            
+            log.info("\n=== 扁平化数据场景测试完成 ===");
+            
+        } catch (Exception e) {
+            log.error("扁平化数据场景测试失败", e);
+        }
+    }
+    
+    /**
+     * 创建扁平化数据物料（无BOM结构）
+     */
+    @SneakyThrows
+    private ItemEntity createFlatDataItem(String code, String name) {
+        log.info("创建扁平化物料: code={}, name={}", code, name);
+        
+        // 创建扁平化的ItemEntity（无父子结构）
+        ItemEntity itemEntity = new ItemEntity();
+        itemEntity.setItemCode(code);
+        itemEntity.setName(name);
+        itemEntity.setUseType("CREATE");
+        itemEntity.setRoot(false);
+        itemEntity.setProps(new HashMap<>());
+        
+        // 设置属性
+        itemEntity.getProps().put("材质", "不锈钢");
+        itemEntity.getProps().put("重量", 5.5f);
+        
+        // 添加modelFile（必需）
+        FileEntity modelFile = new FileEntity();
+        modelFile.setName(code + ".prt");
+        modelFile.setPath("/tmp/flat-data/" + code + ".prt");
+        itemEntity.setModelFile(modelFile);
+        
+        // 注意：不设置children，保持扁平化
+        
+        List<ItemEntity> entities = List.of(itemEntity);
+        
+        // 调用保存接口
+        PostItemEntityResponse response = cadApiService.postItemEntity(entities);
+        
+        return response.getItemEntities().get(0);
+    }
+    
+    /**
+     * 同时创建新物料和更新现有物料（扁平化数据，无BOM结构）
+     */
+    @SneakyThrows
+    private List<ItemEntity> createAndUpdateFlatDataItems(Long existingId, String existingCode) {
+        log.info("同时创建新物料和更新现有物料: existingId={}, existingCode={}", existingId, existingCode);
+        
+        // 1. 创建新物料的ItemEntity
+        ItemEntity newItem = new ItemEntity();
+        String newCode = "FLAT-NEW-002-" + dateCode;
+        newItem.setItemCode(newCode);
+        newItem.setName("批量创建的扁平化物料");
+        newItem.setUseType("CREATE");
+        newItem.setRoot(false);
+        newItem.setProps(new HashMap<>());
+        newItem.getProps().put("材质", "塑料");
+        newItem.getProps().put("重量", 2.3f);
+        newItem.getProps().put("description", "批量操作中创建的新物料");
+        
+        // 添加modelFile（必需）
+        FileEntity newModelFile = new FileEntity();
+        newModelFile.setName(newCode + ".prt");
+        newModelFile.setPath("/tmp/flat-data/" + newCode + ".prt");
+        newItem.setModelFile(newModelFile);
+        
+        // 2. 更新现有物料的ItemEntity
+        ItemEntity updateItem = new ItemEntity();
+        updateItem.setId(existingId);
+        updateItem.setItemCode(existingCode);
+        updateItem.setName("批量更新的扁平化物料");
+        updateItem.setUseType("OVERRIDE");
+        updateItem.setRoot(false);
+        updateItem.setProps(new HashMap<>());
+        updateItem.getProps().put("材质", "铝合金");
+        updateItem.getProps().put("重量", 3.2f);
+        updateItem.getProps().put("description", "批量操作中更新的现有物料");
+        
+        // 添加modelFile（必需）
+        FileEntity updateModelFile = new FileEntity();
+        updateModelFile.setName(existingCode + ".prt");
+        updateModelFile.setPath("/tmp/flat-data/" + existingCode + ".prt");
+        updateItem.setModelFile(updateModelFile);
+        
+        // 3. 同时提交两个物料（一个创建，一个更新）
+        List<ItemEntity> entities = List.of(newItem, updateItem);
+        
+        // 调用保存接口
+        PostItemEntityResponse response = cadApiService.postItemEntity(entities);
+        
+        return response.getItemEntities();
     }
 }
