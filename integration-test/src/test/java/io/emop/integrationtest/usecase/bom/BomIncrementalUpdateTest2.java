@@ -384,4 +384,91 @@ public class BomIncrementalUpdateTest2 {
         
         log.info("✅ 场景18完成 - 叶子节点更新成功且性能良好");
     }
+
+    /**
+     * 场景19：重复 UPDATE 根节点导致唯一约束冲突
+     * 
+     * 这个测试用例复现了一个 bug：
+     * 当第二次使用 UPDATE 动作保存同一个根节点时，会违反数据库的唯一约束
+     * idx_root: UNIQUE(targetobjecttypeid, targetitemcode, targetrevid) WHERE parent IS NULL
+     * 
+     * 结构：
+     * Root
+     * └── Part1 (qty=1)
+     * 
+     * 操作：
+     * 1. 第一次创建 BOM（useType=OVERRIDE, action=UPDATE）
+     * 2. 第二次更新 BOM（useType=OVERRIDE, action=UPDATE）- 应该会失败
+     * 
+     * 预期：第二次保存应该更新现有的根节点，而不是尝试创建新的根节点
+     */
+    @Test
+    @Order(19)
+    void testScenario19_DuplicateRootUpdateCausesUniqueConstraintViolation() {
+        log.info("=== 场景19：重复 UPDATE 根节点导致唯一约束冲突 ===");
+
+        // 创建组件
+        CADComponent root = createAndSaveComponent("DUP-ROOT", "A");
+        CADComponent part1 = createAndSaveComponent("DUP-PART1", "A");
+
+        // 1. 第一次创建 BOM（useType=OVERRIDE, action=UPDATE）
+        BomLine rootLine1 = createBomLine(root, BomUpdateAction.UPDATE.name());
+
+        BomLine part1Line1 = createBomLine(part1, BomUpdateAction.UPDATE.name());
+        part1Line1.setQuantity(1.0f);
+
+        rootLine1.setChildren(Arrays.asList(part1Line1));
+
+        BomView bomView = createBomView("DUP-ROOT-BOM", "Duplicate Root BOM", "A");
+        BomView savedBomView1 = S.service(BomService.class).saveOrUpdateBomStructures(Map.of(bomView, rootLine1))
+                .iterator().next();
+
+        Long firstToplineId = savedBomView1.getToplineId();
+        assertNotNull(firstToplineId, "第一次保存应该成功，toplineId 不应为空");
+        log.info("第一次保存成功，toplineId: {}", firstToplineId);
+
+        // 验证第一次保存的数据
+        BomLine firstBom = topline(savedBomView1);
+        assertNotNull(firstBom);
+        assertEquals(1, firstBom.getChildren().size());
+        assertEquals(1.0f, firstBom.getChildren().get(0).getQuantity());
+
+        // 2. 第二次更新 BOM（useType=OVERRIDE, action=UPDATE）
+        // 这里模拟用户再次发送完整的 BOM 结构，action 仍然是 UPDATE
+        BomLine rootLine2 = createBomLine(root, BomUpdateAction.UPDATE.name());
+
+        BomLine part1Line2 = createBomLine(part1, BomUpdateAction.UPDATE.name());
+        part1Line2.setQuantity(2.0f); // 修改数量
+
+        rootLine2.setChildren(Arrays.asList(part1Line2));
+
+        // 这里应该会抛出唯一约束冲突异常
+        log.info("第二次保存 BOM（应该会失败）...");
+
+        BomView savedBomView2 = S.service(BomService.class).saveOrUpdateBomStructures(Map.of(savedBomView1, rootLine2))
+                .iterator().next();
+
+        Long secondToplineId = savedBomView2.getToplineId();
+        log.info("第二次保存成功，toplineId: {}", secondToplineId);
+
+        // 验证第二次保存的数据
+        BomLine secondBom = topline(savedBomView2);
+        assertNotNull(secondBom);
+        assertEquals(1, secondBom.getChildren().size());
+        assertEquals(2.0f, secondBom.getChildren().get(0).getQuantity(),
+                "第二次保存后，Part1 的数量应该更新为 2");
+
+        // 验证数据库中只有一个根节点
+        List<BomLine> bomlines = Q.<BomLine>objectType(BomLine.class.getName())
+                .whereTuples("targetObjectTypeId, targetItemCode, targetRevId",
+                        rootLine2.getTargetInfo().toTuple())
+                .query();
+
+        
+        assertEquals(1, bomlines.stream().filter(bl -> bl.getHierarchical().getParentItemCode() == null).count(),
+                "数据库中应该只有一个根节点（不应该创建重复的根节点）");
+
+        log.info("✅ 场景19完成 - 第二次 UPDATE 根节点成功，没有违反唯一约束");
+
+    }
 }
