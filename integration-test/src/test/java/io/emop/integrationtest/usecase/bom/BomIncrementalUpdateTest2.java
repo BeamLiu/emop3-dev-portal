@@ -471,4 +471,142 @@ public class BomIncrementalUpdateTest2 {
         log.info("✅ 场景19完成 - 第二次 UPDATE 根节点成功，没有违反唯一约束");
 
     }
+
+    /**
+     * 场景20：复现外键约束冲突 - BomView 引用的 BomLine 被删除
+     * 
+     * 这个测试用例复现了外键约束冲突的问题：
+     * 当一个 BomLine 既是某个 BomView 的 topline，又需要被删除时，
+     * 会违反 fk_bom_view_top 外键约束。
+     * 
+     * 结构：
+     * BigBom (Root)
+     * └── SubAssembly1 (这个节点同时也是 SubBom 的 topline)
+     *     └── Part1 (qty=1)
+     * 
+     * SubBom (独立的 BOM)
+     * └── SubAssembly1 (topline)
+     *     └── Part1 (qty=1)
+     * 
+     * 操作：
+     * 1. 创建大 BOM
+     * 2. 创建独立的 SubBom，topline 指向 SubAssembly1
+     * 3. 更新 SubBom，修改 Part1 数量（这会触发删除 SubAssembly1 的操作）
+     * 4. 预期：应该抛出外键约束冲突异常
+     */
+    @Test
+    @Order(20)
+    void testScenario20_ForeignKeyConstraintViolation() {
+        log.info("=== 场景20：复现外键约束冲突 - 更新大 BOM 时删除被 BomView 引用的子节点 ===");
+
+        // 创建组件
+        CADComponent root = createAndSaveComponent("FK-ROOT", "A");
+        CADComponent subAsm1 = createAndSaveComponent("FK-SUBASM1", "A");
+        CADComponent part1 = createAndSaveComponent("FK-PART1", "A");
+
+        // 1. 先创建独立的 SubBom（这会创建 SubAssembly1 作为 topline，parent=null）
+        BomLine subAsm1Root = createBomLine(subAsm1, BomUpdateAction.UPDATE.name());
+        BomLine subPart1 = createBomLine(part1, BomUpdateAction.UPDATE.name());
+        subPart1.setQuantity(1.0f);
+        subAsm1Root.setChildren(Arrays.asList(subPart1));
+
+        BomView subBomView = createBomView("FK-SUB-BOM", "FK Sub BOM", "A");
+        BomView savedSubBomView = S.service(BomService.class).saveOrUpdateBomStructures(Map.of(subBomView, subAsm1Root))
+                .iterator().next();
+        
+        Long subBomToplineId = savedSubBomView.getToplineId();
+        assertNotNull(subBomToplineId, "SubBom 的 toplineId 不应为空");
+        log.info("独立 SubBom 创建完成，toplineId: {}", subBomToplineId);
+
+        // 验证数据库中有一个 SubAssembly1 的 BomLine（parent=null）
+        List<BomLine> subAsm1Lines = Q.<BomLine>objectType(BomLine.class.getName())
+                .where("targetItemCode=?", subAsm1.getCode())
+                .query();
+        assertEquals(1, subAsm1Lines.size(), "此时应该只有一个 SubAssembly1 的 BomLine");
+        assertNull(subAsm1Lines.get(0).getHierarchical().getParentItemCode(), 
+            "这个 BomLine 应该是 topline（parent=null）");
+
+        // 2. 再创建大 BOM（这会创建另一个 SubAssembly1 作为子节点，parent=Root）
+        BomLine rootLine = createBomLine(root, BomUpdateAction.UPDATE.name());
+        
+        BomLine subAsm1Line = createBomLine(subAsm1, BomUpdateAction.UPDATE.name());
+        BomLine part1Line = createBomLine(part1, BomUpdateAction.UPDATE.name());
+        part1Line.setQuantity(1.0f);
+        subAsm1Line.setChildren(Arrays.asList(part1Line));
+        
+        rootLine.setChildren(Arrays.asList(subAsm1Line));
+
+        BomView bigBomView = createBomView("FK-BIG-BOM", "FK Big BOM", "A");
+        BomView savedBigBomView = S.service(BomService.class).saveOrUpdateBomStructures(Map.of(bigBomView, rootLine))
+                .iterator().next();
+        
+        log.info("大 BOM 创建完成");
+
+        // 验证数据库中现在有两个 SubAssembly1 的 BomLine
+        subAsm1Lines = Q.<BomLine>objectType(BomLine.class.getName())
+                .where("targetItemCode=?", subAsm1.getCode())
+                .query();
+        assertEquals(2, subAsm1Lines.size(), "此时应该有两个 SubAssembly1 的 BomLine");
+        
+        long toplineCount = subAsm1Lines.stream()
+                .filter(line -> line.getHierarchical().getParentItemCode() == null)
+                .count();
+        long childCount = subAsm1Lines.stream()
+                .filter(line -> line.getHierarchical().getParentItemCode() != null)
+                .count();
+        assertEquals(1, toplineCount, "应该有一个 topline（parent=null）");
+        assertEquals(1, childCount, "应该有一个子节点（parent=Root）");
+
+        // 3. 更新大 BOM（修改 Part1 数量，这会触发删除 SubAssembly1 子节点的操作）
+        BomLine updatedRootLine = createBomLine(root, BomUpdateAction.KEEP.name());
+        
+        BomLine updatedSubAsm1Line = createBomLine(subAsm1, BomUpdateAction.UPDATE.name());
+        BomLine updatedPart1Line = createBomLine(part1, BomUpdateAction.UPDATE.name());
+        updatedPart1Line.setQuantity(5.0f); // 修改数量
+        updatedSubAsm1Line.setChildren(Arrays.asList(updatedPart1Line));
+        
+        updatedRootLine.setChildren(Arrays.asList(updatedSubAsm1Line));
+
+        log.info("尝试更新大 BOM（应该成功，不会触发外键约束冲突）...");
+
+        // 4. 验证：更新应该成功，不会抛出外键约束冲突异常
+        // 因为 batchDeleteChildRelations 会识别 topline 并跳过删除
+        S.service(BomService.class).saveOrUpdateBomStructures(Map.of(savedBigBomView, updatedRootLine));
+        
+        log.info("大 BOM 更新成功");
+
+        // 5. 验证数据库状态
+        subAsm1Lines = Q.<BomLine>objectType(BomLine.class.getName())
+                .where("targetItemCode=?", subAsm1.getCode())
+                .query();
+        
+        // 应该仍然有两个 SubAssembly1 的 BomLine（一个 topline，一个子节点）
+        assertEquals(2, subAsm1Lines.size(), "更新后应该仍有两个 SubAssembly1 的 BomLine");
+        
+        toplineCount = subAsm1Lines.stream()
+                .filter(line -> line.getHierarchical().getParentItemCode() == null)
+                .count();
+        childCount = subAsm1Lines.stream()
+                .filter(line -> line.getHierarchical().getParentItemCode() != null)
+                .count();
+        assertEquals(1, toplineCount, "应该仍有一个 topline（parent=null）");
+        assertEquals(1, childCount, "应该仍有一个子节点（parent=Root）");
+
+        // 6. 验证 SubBom 的 topline 仍然有效
+        BomView reloadedSubBomView = Q.<BomView>objectType(BomView.class.getName())
+                .whereByBusinessKeys(savedSubBomView)
+                .first();
+        assertNotNull(reloadedSubBomView.getToplineId(), "SubBom 的 toplineId 应该仍然有效");
+        assertEquals(subBomToplineId, reloadedSubBomView.getToplineId(), 
+            "SubBom 的 toplineId 应该保持不变");
+
+        // 7. 验证大 BOM 中的 Part1 数量已更新
+        BomLine reloadedBigBom = topline(savedBigBomView);
+        BomLine reloadedPart1 = findBomLineByTargetCode(reloadedBigBom, part1.getCode());
+        assertNotNull(reloadedPart1, "应该能在大 BOM 中找到 Part1");
+        assertEquals(5.0f, reloadedPart1.getQuantity(), 
+            "大 BOM 中 Part1 的数量应该已更新为 5");
+
+        log.info("✅ 场景20完成 - 外键约束冲突已修复，topline 被保留并更新");
+    }
 }
