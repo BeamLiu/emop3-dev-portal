@@ -202,3 +202,11 @@ CAD客户端 → 获取BOM结构 → 批量下载文件 → 解压到本地
 ### Maven配置
 
 确保已配置阿里云私仓，在 `~/.m2/settings.xml` 中添加。
+
+
+### EMOP平台对比
+技术栈对比
+[![技术栈](./docs/images/emopVStc1.png)](./docs/images/emopVStc1.png)
+
+基础能力对比
+[![基础能力](./docs/images/emopVStc2.png)](./docs/images/emopVStc2.png)
